@@ -1,6 +1,7 @@
 import networkx as nx
 import collections
 import shutil
+import zipfile
 import json
 import csv
 import os
@@ -150,6 +151,42 @@ def from_json(data):
     graph.add_edges_from([(nodes[edge[0]], nodes[edge[1]])
                           for edge in data['edges']])
     return graph
+
+
+def zip2dict(f, table):
+    zf = zipfile.ZipFile(f)
+    fnames = zf.namelist()
+    pattern = lambda fname: fname.endswith('.data.json') and fname.count('/{}_'.format(table)) > 0
+    fname = filter(pattern, fnames)[0]
+    ol = [json.loads(line) for line in zf.read(fname).split('\n') if line.strip()]
+    d = {}
+    for o in ol:
+        if o['type'] == 2300:
+            d[o['data']['_key']] = o['data']
+        elif o['type'] == 2302 and o['data']['_key'] in d:
+            del d[o['data']['_key']]
+    return dict((d[k]['_id'].replace(table+'/', ''), d[k]) for k in d)
+
+
+def from_dump(f):
+    user_groups = zip2dict(f, 'usersInGroups')
+    users = zip2dict(f, 'users')
+    groups = zip2dict(f, 'groups')
+    connections = zip2dict(f, 'connections')
+    ret = {'nodes': [], 'edges': []}
+    buf = {}
+    for u in users:
+        users[u] = {'node_type': 'Honest', 'rank': 0, 'name': u , 'groups': []}
+        ret['nodes'].append(users[u])
+    for user_group in user_groups.values():
+        u = user_group['_from'].replace('users/', '')
+        g = user_group['_to'].replace('groups/', '')
+        users[u]['groups'].append(g)
+        if groups[g].get('seed', False):
+            users[u]['node_type'] = 'Seed'
+    for c in connections.values():
+        ret['edges'].append([c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
+    return json.dumps(ret)
 
 
 TEMPLATE = None

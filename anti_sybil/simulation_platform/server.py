@@ -19,8 +19,6 @@ os.chdir(dname)
 app = Flask(__name__)
 app.secret_key = '80393af8b3d99736c8b0d49d9a9da4ff'
 
-app.config['ALLOWED_EXTENSIONS'] = set(['json'])
-
 algorithm_options = {
     'min_degree': 5,
     'accumulative': False,
@@ -84,21 +82,24 @@ def add_sybils():
     return json.dumps({'success': True, 'graph': json_graph, 'graph_info': graph_info})
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-
-
 @app.route('/upload_graph_json', methods=['POST'])
 def upload_graph_json():
-    file = request.files.get('graph_json_file')
-    if file and allowed_file(file.filename):
+    file = request.files.get('graph_json_file', None)
+    if not file:
+        return json.dumps({'success': False})
+    ext = file.filename.rsplit('.', 1)[1]
+    if ext == 'json':
         json_graph = file.stream.read()
-        graph = from_json(json_graph)
-        ranker = algorithms.SybilGroupRank(graph, algorithm_options)
-        ranker.rank()
-        graph_info = edit_output(graph)
-        return json.dumps({'success': True, 'graph': json_graph, 'graph_info': graph_info})
+    elif ext == 'zip':
+        json_graph = from_dump(file.stream)
+    else:
+        return json.dumps({'success': False})
+    graph = from_json(json_graph)
+    reset_ranks(graph)
+    ranker = algorithms.SybilGroupRank(graph, algorithm_options)
+    ranker.rank()
+    graph_info = edit_output(graph)
+    return json.dumps({'success': True, 'graph': to_json(graph), 'graph_info': graph_info})
 
 
 @app.route('/save_json_file', methods=['GET', 'POST'])
@@ -133,6 +134,7 @@ def new_graph():
     graph_info = edit_output(graph)
     json_graph = to_json(graph)
     return json.dumps({'success': True, 'graph': json_graph, 'graph_info': graph_info})
+
 
 def main():
     app.run(debug=True, host='127.0.0.1', port=8082, threaded=True)
