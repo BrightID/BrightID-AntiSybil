@@ -1,0 +1,3 @@
+include anti_sybil/simulation_platform/graph.json
+graft anti_sybil/simulation_platform/static
+global-exclude *.pyc

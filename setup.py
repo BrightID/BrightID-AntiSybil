@@ -14,13 +14,8 @@ setuptools.setup(
     url="http://github.com/BrightID/BrightID-Node",
     packages=setuptools.find_packages(),
     install_requires=['networkx==2.1', 'python-arango==4.2.1', 'flask'],
-    data_files=[
-        ('anti_sybil/simulation_platform', ['anti_sybil/simulation_platform/graph.json']),
-        ('anti_sybil/simulation_platform/static', [
-            'anti_sybil/simulation_platform/static/index.html',
-            'anti_sybil/simulation_platform/static/graph.js',
-            'anti_sybil/simulation_platform/static/app.js'
-        ])],
+    include_package_data=True,
+    zip_safe=False,
     classifiers=[
         "Programming Language :: Python :: 2.7",
         "License :: OSI Approved :: MIT License",
