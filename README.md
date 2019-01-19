@@ -9,9 +9,7 @@ This package provides a framework to generate different types of test graphs and
 ### Install
 
 ```
-git clone https://github.com/BrightID/BrightID-AntiSybil.git
-cd BrightID-AntiSybil
-pip install .
+pip install anti_sybil
 ```
 
 ### Web Based UI
