@@ -20,5 +20,5 @@ Run `anti_sybil_server` in your termainal and then open `localhost:8082` in your
 
 We tested four different algorithms with different parameters. This was made possible through funding from Aragon. The documentation and output of these trials are below.
 
-https://docs.google.com/document/d/1-mskGNiVxtoBWLRYypFXa003y1H9-ZAHJnXuc0i-xsE/edit#heading=h.44stmx2536if
-https://docs.google.com/document/d/1C4wX-NjypgKKd92puqJTt9AiAHu55oWm3LqWbPeOBDM/edit#heading=h.44stmx2536if 
+[Anti-Sybil Milestone 2 notes](https://docs.google.com/document/d/1-mskGNiVxtoBWLRYypFXa003y1H9-ZAHJnXuc0i-xsE/edit#heading=h.44stmx2536if)
+[Anti-Sybil Milestone 5 notes](https://docs.google.com/document/d/1C4wX-NjypgKKd92puqJTt9AiAHu55oWm3LqWbPeOBDM/edit#heading=h.44stmx2536if)
