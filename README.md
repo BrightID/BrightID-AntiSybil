@@ -14,7 +14,7 @@ pip install anti_sybil
 
 ### Web Based UI
 
-Run `anti_sybil_server` in your termainal and then open `localhost:8082` in your browser.
+Run `anti_sybil_server` in your terminal and then open `localhost:8082` in your browser.
 
 ### Anti-Sybil Algorithm Trials
 
