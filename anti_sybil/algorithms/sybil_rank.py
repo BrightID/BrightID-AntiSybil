@@ -90,7 +90,7 @@ class SybilRank():
             if rank < border:
                 new_rank = 10*rank / border
             else:
-                new_rank = 90 + 10*(rank - border)/(max_rank - border)
+                new_rank = 90 + 9.99*(rank - border)/(max_rank - border)
             res.append((node, round(new_rank, 2)))
         return res
 
