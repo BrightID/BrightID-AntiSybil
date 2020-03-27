@@ -1,4 +1,4 @@
-import sybil_rank
+from . import sybil_rank
 import networkx as nx
 import itertools
 from anti_sybil.graphs.node import Node

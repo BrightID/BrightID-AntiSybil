@@ -1,6 +1,6 @@
-import cut_region
-import no_group
-import group_based
-import group_merging
-import networkrepository
-import seed_mirror
+from . import cut_region
+from . import no_group
+from . import group_based
+from . import group_merging
+from . import networkrepository
+from . import seed_mirror

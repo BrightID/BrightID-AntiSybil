@@ -1,2 +1,2 @@
 name = "anti_sybil"
-import simulation_platform
+import anti_sybil.simulation_platform

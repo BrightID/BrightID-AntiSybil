@@ -1,3 +1,3 @@
-import generators
-import modifiers
-import node
+from . import generators
+from . import modifiers
+from . import node

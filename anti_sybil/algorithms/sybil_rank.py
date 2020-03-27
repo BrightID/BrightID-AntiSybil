@@ -31,7 +31,7 @@ class SybilRank():
     def spread_nodes_rank(self, nodes_rank):
         accumulative = self.options.get('accumulative', False);
         new_nodes_rank = {}
-        for node, rank in nodes_rank.iteritems():
+        for node, rank in iter(nodes_rank.items()):
             new_trust = 0.0
             if accumulative:
                 new_trust = rank
@@ -95,7 +95,7 @@ class SybilRank():
         return res
 
     def normalize_nodes_rank(self, nodes_rank):
-        for node, rank in nodes_rank.iteritems():
+        for node, rank in iter(nodes_rank.items()):
             node_degree = self.graph.degree(node)
             nodes_rank[node] = rank / float(node_degree)
             node.raw_rank = nodes_rank[node]

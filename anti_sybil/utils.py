@@ -5,7 +5,7 @@ import zipfile
 import json
 import csv
 import os
-import graphs
+from . import graphs
 from bisect import bisect
 
 

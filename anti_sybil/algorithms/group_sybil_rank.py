@@ -1,6 +1,6 @@
 import math
 import operator
-import sybil_rank
+from . import sybil_rank
 
 
 class GroupSybilRank(sybil_rank.SybilRank):
@@ -73,10 +73,10 @@ class GroupSybilRank(sybil_rank.SybilRank):
 
     def normalize_nodes_rank(self, nodes_rank):
         final_nodes_rank = {}
-        for node, rank in nodes_rank.iteritems():
+        for node, rank in iter(nodes_rank.items()):
             node_degree = self.graph.degree(node)
             final_nodes_rank[node] = sum(nodes_rank[node].values()) / float(node_degree)
-        ranks = sorted(final_nodes_rank.iteritems(),
+        ranks = sorted(iter(final_nodes_rank.items()),
                        key=operator.itemgetter(1))
         if self.options['nonlinear_distribution']:
             ranks = self.nonlinear_distribution(ranks, .5, 10, 90)
