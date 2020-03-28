@@ -6,6 +6,7 @@ import time
 import json
 import networkx as nx
 from flask import Flask, session, redirect, url_for, escape, request, make_response
+import io
 
 from anti_sybil import algorithms
 from anti_sybil.graphs.node import Node
@@ -91,7 +92,8 @@ def upload_graph_json():
     if ext == 'json':
         json_graph = file.stream.read()
     elif ext == 'zip':
-        json_graph = from_dump(file.stream)
+        f = io.BytesIO(file.stream.read())
+        json_graph = from_dump(f)
     else:
         return json.dumps({'success': False})
     graph = from_json(json_graph)
