@@ -157,8 +157,9 @@ def zip2dict(f, table):
     zf = zipfile.ZipFile(f)
     fnames = zf.namelist()
     pattern = lambda fname: fname.endswith('.data.json') and fname.count('/{}_'.format(table)) > 0
-    fname = filter(pattern, fnames)[0]
-    ol = [json.loads(line) for line in zf.read(fname).split('\n') if line.strip()]
+    fname = list(filter(pattern, fnames))[0]
+    content = zf.open(fname).read().decode('utf-8')
+    ol = [json.loads(line) for line in content.split('\n') if line.strip()]
     d = {}
     for o in ol:
         if o['type'] == 2300:
