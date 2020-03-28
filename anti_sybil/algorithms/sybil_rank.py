@@ -52,7 +52,7 @@ class SybilRank():
         counts = {}
         for num in nums:
             counts[int(num)] = counts.get(int(num), 0) + 1
-        navg = sum(sorted(nums)[len(nums)/10:-1*len(nums)/10]) / (.8*len(nums))
+        navg = sum(sorted(nums)[int(len(nums)/10):int(-1*len(nums)/10)]) / (.8*len(nums))
         navg = int(navg)
         max_num = max(nums)
         # find distance from average which include half of numbers
@@ -99,7 +99,7 @@ class SybilRank():
             node_degree = self.graph.degree(node)
             nodes_rank[node] = rank / float(node_degree)
             node.raw_rank = nodes_rank[node]
-        ranks = nodes_rank.items()
+        ranks = list(nodes_rank.items())
         if self.options.get('nonlinear_distribution', False):
             ranks = self.nonlinear_distribution(ranks, .5, 10, 90)
         elif self.options.get('stupid_sybil_border', False):
