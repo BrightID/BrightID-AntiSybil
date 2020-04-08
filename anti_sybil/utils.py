@@ -19,7 +19,7 @@ def write_output_file(outputs, file_name):
         if title != 'name':
             rows.append([title] + [output.get(title, '') for output in outputs])
 
-    with open(file_name, 'wb') as f:
+    with open(file_name, 'w') as f:
         writer = csv.writer(f)
         for row in rows:
             writer.writerow(row)
@@ -135,7 +135,7 @@ def to_json(graph):
 
 
 def load_graph(file_name):
-    with open(file_name, 'rb') as f:
+    with open(file_name, 'r') as f:
         data = f.read()
     return from_json(data)
 
@@ -205,7 +205,7 @@ def draw_graph(graph, file_name):
         os.makedirs(dname)
     json_dic = to_json(graph)
     edited_string = TEMPLATE.replace('JSON_GRAPH', json_dic)
-    with open(file_name, 'wb') as output_file:
+    with open(file_name, 'w') as output_file:
         output_file.write(edited_string)
     return edited_string
 
