@@ -1,6 +1,5 @@
 import networkx as nx
 import collections
-import shutil
 import zipfile
 import json
 import csv
@@ -142,12 +141,13 @@ def load_graph(file_name):
 
 def from_json(data):
     data = json.loads(data)
+    graph = nx.Graph()
     nodes = {}
     for node in data['nodes']:
         groups = set(node['groups']) if node['groups'] else None
         nodes[node['name']] = graphs.node.Node(
             node['name'], node['node_type'], groups, node['rank'])
-    graph = nx.Graph()
+        graph.add_node(nodes[node['name']])
     graph.add_edges_from([(nodes[edge[0]], nodes[edge[1]])
                           for edge in data['edges']])
     return graph
