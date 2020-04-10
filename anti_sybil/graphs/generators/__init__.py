@@ -4,3 +4,4 @@ from . import group_based
 from . import group_merging
 from . import networkrepository
 from . import seed_mirror
+from . import brightid_backup
