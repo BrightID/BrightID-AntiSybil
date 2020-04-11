@@ -1,6 +1,7 @@
 import networkx as nx
 import collections
 import zipfile
+import tarfile
 import json
 import csv
 import os
@@ -232,3 +233,16 @@ def draw_compare_graph(graph1, graph2, file_name):
 def reset_ranks(graph):
     for node in graph.nodes():
         node.rank = 0
+
+
+def tar_to_zip(fin, fout):
+    if os.path.exists(fout):
+        os.remove(fout)
+    tarf = tarfile.open(fin, mode='r|gz')
+    zipf = zipfile.ZipFile(fout, mode='a', compression=zipfile.ZIP_DEFLATED)
+    for m in tarf:
+        f = tarf.extractfile(m)
+        if f:
+            zipf.writestr(m.name, f.read())
+    tarf.close()
+    zipf.close()
