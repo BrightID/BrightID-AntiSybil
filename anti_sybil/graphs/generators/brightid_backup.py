@@ -2,26 +2,11 @@ import sys
 sys.path.append('../../')
 
 import anti_sybil.utils
-import tarfile
-import zipfile
 import os
 import requests
 import sys
 
 BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
-
-
-def tar_to_zip(fin, fout):
-    if os.path.exists(fout):
-        os.remove(fout)
-    tarf = tarfile.open(fin, mode='r|gz')
-    zipf = zipfile.ZipFile(fout, mode='a', compression=zipfile.ZIP_DEFLATED)
-    for m in tarf:
-        f = tarf.extractfile(m)
-        if f:
-            zipf.writestr(m.name, f.read())
-    tarf.close()
-    zipf.close()
 
 
 def generate(data):
@@ -35,7 +20,7 @@ def generate(data):
     backup = requests.get(BACKUP_URL)
     with open(rar_addr, 'wb') as f:
         f.write(backup.content)
-    tar_to_zip(rar_addr, zip_addr)
+    anti_sybil.utils.tar_to_zip(rar_addr, zip_addr)
     json_graph = anti_sybil.utils.from_dump(zip_addr)
     graph = anti_sybil.utils.from_json(json_graph)
     return graph
