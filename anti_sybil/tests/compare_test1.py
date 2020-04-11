@@ -35,7 +35,7 @@ attacker.groups.remove('stupid_sybil')
 print('*' * 100)
 print('border1', border)
 
-# SybilGroupRank with with the stupid sybil border option
+# SybilGroupRank with the stupid sybil border option
 reset_ranks(graph)
 ranker = algorithms.SybilGroupRank(graph, {
     'stupid_sybil_border': border
@@ -45,7 +45,7 @@ graph1 = copy.deepcopy(ranker.graph)
 draw_graph(graph1, os.path.join(OUTPUT_FOLDER, 'graph1.html'))
 output1 = generate_output(graph1, 'SybilGroupRank\n(stupid sybil border)')
 
-# SybilGroupRank with without the stupid sybil border option
+# SybilGroupRank without the stupid sybil border option
 reset_ranks(graph)
 ranker = algorithms.SybilGroupRank(graph)
 ranker.rank()
