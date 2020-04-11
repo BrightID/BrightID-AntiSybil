@@ -2,10 +2,10 @@ import sys
 sys.path.append('../')
 
 import os
-import time
 import json
+import requests
 import networkx as nx
-from flask import Flask, session, redirect, url_for, escape, request, make_response
+from flask import Flask, redirect, request, make_response
 import io
 
 from anti_sybil import algorithms
@@ -46,13 +46,15 @@ def add_sybils_to_graph(graph, sybils_defenition):
     edges = []
     for i, row in enumerate(sybils_defenition.strip().split('\n')):
         edge = row.strip().split()
-        edge = [int(node_name) if node_name.isdigit() else node_name for node_name in edge]
+        edge = [int(node_name) if node_name.isdigit()
+                else node_name for node_name in edge]
         for node_name in edge:
             if node_name not in nodes_dic:
-                nodes_dic[node_name] = Node(node_name, 'Sybil', groups=set(['sybils']))
+                nodes_dic[node_name] = Node(
+                    node_name, 'Sybil', groups=set(['sybils']))
         edges.append((nodes_dic[edge[0]], nodes_dic[edge[1]]))
     graph.add_edges_from(edges)
-    sybils = [node for node in nodes_dic.values() if node.node_type=='Sybil']
+    sybils = [node for node in nodes_dic.values() if node.node_type == 'Sybil']
     for sybil in sybils:
         for neighbour in graph.neighbors(sybil):
             if neighbour.node_type != 'Sybil':
@@ -62,8 +64,16 @@ def add_sybils_to_graph(graph, sybils_defenition):
 
 @app.route('/load_default', methods=['GET', 'POST'])
 def load_default():
-    graph = load_graph('graph.json')
-    ranker = algorithms.SybilGroupRank(graph, algorithm_options)
+    if not os.path.exists('./data/'):
+        os.makedirs('./data/')
+    backup = requests.get(
+        'https://storage.googleapis.com/brightid-backups/brightid.tar.gz')
+    with open('./data/brightid.tar.gz', 'wb') as f:
+        f.write(backup.content)
+    tar_to_zip('./data/brightid.tar.gz', './data/brightid.zip')
+    json_graph = from_dump('./data/brightid.zip')
+    graph = from_json(json_graph)
+    ranker = algorithms.SybilGroupRank(graph)
     ranker.rank()
     graph_info = edit_output(graph)
     return json.dumps({'success': True, 'graph': to_json(graph), 'graph_info': graph_info})
@@ -141,5 +151,6 @@ def new_graph():
 def main():
     app.run(debug=True, host='127.0.0.1', port=8082, threaded=True)
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     main()
