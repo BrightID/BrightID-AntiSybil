@@ -1,5 +1,4 @@
 import math
-import operator
 
 
 class SybilRank():
@@ -29,7 +28,7 @@ class SybilRank():
         return nodes_rank
 
     def spread_nodes_rank(self, nodes_rank):
-        accumulative = self.options.get('accumulative', False);
+        accumulative = self.options.get('accumulative', False)
         new_nodes_rank = {}
         for node, rank in iter(nodes_rank.items()):
             new_trust = 0.0
@@ -41,7 +40,6 @@ class SybilRank():
                 if neighbor_degree > 0:
                     new_trust += (nodes_rank[neighbor] * self.graph[node][neighbor].get('weight', 1)) / float(neighbor_degree)
             new_nodes_rank[node] = new_trust
-
         return new_nodes_rank
 
     @staticmethod
@@ -97,7 +95,8 @@ class SybilRank():
     def normalize_nodes_rank(self, nodes_rank):
         for node, rank in iter(nodes_rank.items()):
             node_degree = self.graph.degree(node)
-            nodes_rank[node] = rank / float(node_degree)
+            if node_degree > 0:
+                nodes_rank[node] = rank / float(node_degree)
             node.raw_rank = nodes_rank[node]
         ranks = list(nodes_rank.items())
         if self.options.get('nonlinear_distribution', False):
