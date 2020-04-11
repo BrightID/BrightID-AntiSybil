@@ -8,7 +8,7 @@ import os
 import requests
 import sys
 
-BACKUP_URL = ''
+BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
 
 
 def tar_to_zip(fin, fout):

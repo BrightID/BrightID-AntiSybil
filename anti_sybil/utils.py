@@ -7,6 +7,8 @@ import os
 from . import graphs
 from bisect import bisect
 
+TEMPLATE = TEMPLATE2 = None
+
 
 def write_output_file(outputs, file_name):
     if len(outputs) == 0:
@@ -190,9 +192,6 @@ def from_dump(f):
     return json.dumps(ret)
 
 
-TEMPLATE = None
-
-
 def draw_graph(graph, file_name):
     global TEMPLATE
     if not TEMPLATE:
@@ -205,6 +204,26 @@ def draw_graph(graph, file_name):
         os.makedirs(dname)
     json_dic = to_json(graph)
     edited_string = TEMPLATE.replace('JSON_GRAPH', json_dic)
+    with open(file_name, 'w') as output_file:
+        output_file.write(edited_string)
+    return edited_string
+
+
+def draw_compare_graph(graph1, graph2, file_name):
+    global TEMPLATE2
+    if not TEMPLATE2:
+        abspath = os.path.abspath(__file__)
+        dname = os.path.dirname(abspath)
+        with open(os.path.join(dname, 'template2.html')) as f:
+            TEMPLATE2 = f.read()
+    dname = os.path.dirname(file_name)
+    if dname and not os.path.exists(dname):
+        os.makedirs(dname)
+    for node in graph1.nodes:
+        node2 = next(filter(lambda n: n.name == node.name, graph2.nodes))
+        node.rank = '{0}-{1}'.format(int(node.rank), int(node2.rank))
+    graph_json = to_json(graph1)
+    edited_string = TEMPLATE2.replace('JSON_GRAPH', graph_json)
     with open(file_name, 'w') as output_file:
         output_file.write(edited_string)
     return edited_string
