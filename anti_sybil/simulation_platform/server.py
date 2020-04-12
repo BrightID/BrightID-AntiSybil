@@ -3,8 +3,10 @@ sys.path.append('../')
 
 import os
 import json
+import time
 import requests
 import networkx as nx
+from threading import Thread
 from flask import Flask, redirect, request, make_response
 import io
 
@@ -26,6 +28,8 @@ algorithm_options = {
     'weaken_under_min': False,
     'nonlinear_distribution': True,
 }
+
+default_graph_addr = './data/brightid.json'
 
 
 @app.route('/')
@@ -64,17 +68,10 @@ def add_sybils_to_graph(graph, sybils_defenition):
 
 @app.route('/load_default', methods=['GET', 'POST'])
 def load_default():
-    if not os.path.exists('./data/'):
-        os.makedirs('./data/')
-    backup = requests.get(
-        'https://storage.googleapis.com/brightid-backups/brightid.tar.gz')
-    with open('./data/brightid.tar.gz', 'wb') as f:
-        f.write(backup.content)
-    tar_to_zip('./data/brightid.tar.gz', './data/brightid.zip')
-    json_graph = from_dump('./data/brightid.zip')
-    graph = from_json(json_graph)
-    ranker = algorithms.SybilGroupRank(graph)
-    ranker.rank()
+    while not os.path.exists(default_graph_addr):
+        time.sleep(1)
+    with open(default_graph_addr, 'r') as f:
+        graph = from_json(f.read())
     graph_info = edit_output(graph)
     return json.dumps({'success': True, 'graph': to_json(graph), 'graph_info': graph_info})
 
@@ -148,7 +145,45 @@ def new_graph():
     return json.dumps({'success': True, 'graph': json_graph, 'graph_info': graph_info})
 
 
+def gen_default():
+    if not os.path.exists('./data/'):
+        os.makedirs('./data/')
+    backup = requests.get(
+        'https://storage.googleapis.com/brightid-backups/brightid.tar.gz')
+    with open('./data/brightid.tar.gz', 'wb') as f:
+        f.write(backup.content)
+    tar_to_zip('./data/brightid.tar.gz', './data/brightid.zip')
+    json_graph = from_dump('./data/brightid.zip')
+    graph = from_json(json_graph)
+    # find stupid sybil border
+    reset_ranks(graph)
+    ranker = algorithms.SybilGroupRank(graph)
+    ranker.rank()
+    attacker = max(graph.nodes, key=lambda node: node.rank)
+    attacker.groups.add('stupid_sybil')
+    sybil1 = graphs.node.Node('stupid_sybil_1', 'Sybil', set(['stupid_sybil']))
+    sybil2 = graphs.node.Node('stupid_sybil_2', 'Sybil', set(['stupid_sybil']))
+    graph.add_edge(attacker, sybil1)
+    graph.add_edge(attacker, sybil2)
+    reset_ranks(graph)
+    ranker = algorithms.SybilGroupRank(graph)
+    ranker.rank()
+    border = max(sybil1.raw_rank, sybil2.raw_rank)
+    graph.remove_nodes_from([sybil1, sybil2])
+    attacker.groups.remove('stupid_sybil')
+    # SybilGroupRank with the stupid sybil border option
+    reset_ranks(graph)
+    ranker = algorithms.SybilGroupRank(graph, {
+        'stupid_sybil_border': border
+    })
+    ranker.rank()
+    with open(default_graph_addr, 'w') as f:
+        f.write(to_json(ranker.graph))
+    return True
+
+
 def main():
+    Thread(target = gen_default).start()
     app.run(debug=True, host='127.0.0.1', port=8082, threaded=True)
 
 
