@@ -15,6 +15,11 @@ class SybilGroupRank(sybil_rank.SybilRank):
                 if group not in groups:
                     groups[group] = []
                 groups[group].append(node)
+
+        # remove the groups with the same members
+        rgroups = {tuple(v): k for k, v in groups.items()}
+        groups = {v: list(k) for k, v in rgroups.items()}
+
         self.groups = groups
         self.group_graph = self.gen_group_graph()
 
