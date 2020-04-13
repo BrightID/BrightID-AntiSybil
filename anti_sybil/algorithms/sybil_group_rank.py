@@ -68,12 +68,16 @@ class SybilGroupRank(sybil_rank.SybilRank):
                 target_nodes = filter(lambda n: len(
                     n.groups) >= self.min_group_req, target_nodes)
             for source_node in source_nodes:
+                if source_node in target_nodes:
+                    continue
                 if source_node in removed:
                     continue
                 for target_node in target_nodes:
                     if source_node in removed:
                         break
                     if target_node in removed:
+                        continue
+                    if target_node in source_nodes:
                         continue
                     if not self.graph.has_edge(source_node, target_node):
                         continue
