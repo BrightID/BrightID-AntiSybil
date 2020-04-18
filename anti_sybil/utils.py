@@ -180,7 +180,7 @@ def from_dump(f):
     ret = {'nodes': [], 'edges': []}
     buf = {}
     for u in users:
-        users[u] = {'node_type': 'Honest', 'rank': 0, 'name': u , 'groups': []}
+        users[u] = {'node_type': 'Honest', 'rank': 0, 'name': u , 'groups': [], 'createdAt':users[u]['createdAt']}
         ret['nodes'].append(users[u])
     for user_group in user_groups.values():
         u = user_group['_from'].replace('users/', '')
@@ -190,6 +190,8 @@ def from_dump(f):
             users[u]['node_type'] = 'Seed'
     for c in connections.values():
         ret['edges'].append([c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
+    ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
+    ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['createdAt'])
     return json.dumps(ret)
 
 
