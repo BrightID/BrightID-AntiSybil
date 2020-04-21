@@ -4,7 +4,6 @@ sys.path.append('../../')
 import anti_sybil.utils
 import os
 import requests
-import sys
 
 BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
 

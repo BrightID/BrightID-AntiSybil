@@ -1,12 +1,9 @@
 import os
-import sys
 import random
-sys.path.append('..')
-
-import algorithms
+from anti_sybil import algorithms
 import inconsistency
-from graphs.node import Node
-from utils import *
+from anti_sybil.graphs.node import Node
+from anti_sybil.utils import *
 from collections import OrderedDict
 
 OUTPUT_FOLDER = './outputs/heavy_target_attack/'

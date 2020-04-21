@@ -1,12 +1,9 @@
 # test effect of grouping seeds
 
-import sys
-sys.path.append('../')
-
-import algorithms
-import graphs
+from anti_sybil import algorithms
+from anti_sybil import graphs
 import os
-from utils import *
+from anti_sybil.utils import *
 
 OUTPUT_FOLDER = './outputs/tests5/'
 

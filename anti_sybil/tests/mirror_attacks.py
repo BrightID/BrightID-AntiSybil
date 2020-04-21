@@ -1,9 +1,5 @@
-import sys
-sys.path.append('..')
-
-import algorithms
-from graphs.node import Node
-from utils import *
+from anti_sybil import algorithms
+from anti_sybil.utils import *
 
 OUTPUT_FOLDER = './outputs/mirror_attacks/'
 

@@ -1,8 +1,6 @@
-import sys
-sys.path.append('../')
-
 from anti_sybil.utils import *
-import algorithms
+from anti_sybil import algorithms
+from anti_sybil import graphs
 import os
 
 OUTPUT_FOLDER = './outputs/repeatability_test/'

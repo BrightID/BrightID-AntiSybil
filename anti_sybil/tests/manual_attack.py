@@ -1,10 +1,6 @@
-import sys
-sys.path.append('../')
-
-import networkx as nx
-import algorithms
-from graphs.node import Node
-from utils import *
+from anti_sybil import algorithms
+from anti_sybil.graphs.node import Node
+from anti_sybil.utils import *
 
 OUTPUT_FOLDER = './outputs/manual_attack/'
 
@@ -29,8 +25,8 @@ def add_sybils(graph, sybils_file_name):
                 neighbour.groups.add('sybils')
 
 
-graph = load_graph('inputs/graph.json')
-add_sybils(graph, 'inputs/sybils.txt')
+graph = load_graph('./inputs/graph.json')
+add_sybils(graph, './inputs/sybils.txt')
 ranker = algorithms.SybilGroupRank(graph, {
     'min_degree': 5,
     'accumulative': False,

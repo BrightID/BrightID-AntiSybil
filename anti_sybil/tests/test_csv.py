@@ -1,20 +1,15 @@
-import sys
-sys.path.append('../')
-
-import networkx as nx
-from utils import *
+from anti_sybil.utils import *
 import collections
-import algorithms
-import graphs
+from anti_sybil import algorithms
+from anti_sybil import graphs
 import shutil
-import pickle
-import json
 import csv
 import os
 
+
 def read_input_file(input_file):
     inputs = collections.OrderedDict()
-    with open(input_file, 'rb') as csvfile:
+    with open(input_file, 'r') as csvfile:
         rows = [row.strip().split(',')
                 for row in csvfile.read().strip().split('\n')]
     for row in rows:
@@ -42,7 +37,7 @@ def write_output_file(output_directory, outputs, input_dic):
             if i == 0:
                 rows[title] = [title]
             rows[title].append(outputs[result][title])
-    with open(os.path.join(output_directory, 'result.csv'), 'wb') as f:
+    with open(os.path.join(output_directory, 'result.csv'), 'w') as f:
         writer = csv.writer(f)
         for row in rows:
             writer.writerow(rows[row])
@@ -69,14 +64,14 @@ def run(dataset, algorithm, input_file, output_directory):
         if input_dic[test_num]['visualize']:
             json_dic = to_json(graph)
             edited_string = TEMPLATE.replace('JSON_GRAPH', json_dic)
-            with open(os.path.join(output_directory, '{0}.html'.format(test_num)), 'wb') as output_file:
+            with open(os.path.join(output_directory, '{0}.html'.format(test_num)), 'w') as output_file:
                 output_file.write(edited_string)
         print('test {0} finished'.format(test_num))
     write_output_file(output_directory, outputs, input_dic)
 
 
 if __name__ == '__main__':
-    with open('template.html') as f:
+    with open('../template.html') as f:
         TEMPLATE = f.read()
     # run(graphs.generators.group_based, algorithms.GroupSybilRank, './inputs/groups_test.csv', './outputs/cvs_tests/')
     run(graphs.generators.cut_region, algorithms.SybilRank, './inputs/cut_region_test.csv', './outputs/cvs_tests/')

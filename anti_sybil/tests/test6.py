@@ -1,13 +1,10 @@
 # test effect of running sybil rank on graph of groups instead of graph of individuals
 
-import sys
-sys.path.append('../')
-
-import algorithms
-import graphs
+from anti_sybil import algorithms
+from anti_sybil import graphs
 import os
 import copy
-from utils import *
+from anti_sybil.utils import *
 
 OUTPUT_FOLDER = './outputs/tests6/'
 

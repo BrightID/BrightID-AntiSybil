@@ -1,11 +1,8 @@
-import sys
-sys.path.append('../')
-
-from algorithms.group_merging import GroupMergingRank
-from algorithms.group_sybil_rank import GroupSybilRank
-import graphs
+from anti_sybil.algorithms.group_merging import GroupMergingRank
+from anti_sybil.algorithms.group_sybil_rank import GroupSybilRank
+from anti_sybil import graphs
 import os
-from utils import *
+from anti_sybil.utils import *
 
 OUTPUT_FOLDER = './outputs/tests_group_merging/'
 

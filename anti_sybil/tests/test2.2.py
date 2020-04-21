@@ -1,13 +1,10 @@
 # Test if GroupSybilRank works better than SybilRank
 
-import sys
-sys.path.append('..')
-
 import os
 import copy
-import algorithms
-import graphs
-from utils import *
+from anti_sybil import algorithms
+from anti_sybil import graphs
+from anti_sybil.utils import *
 
 OUTPUT_FOLDER = './outputs/tests2.2/'
 main_graph_params = {

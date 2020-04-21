@@ -1,12 +1,8 @@
-import sys
-sys.path.append('../')
-
 from anti_sybil.utils import *
-import algorithms
+from anti_sybil import algorithms
 import xmltodict
 import requests
 import os
-import sys
 
 BACKUP_URL = 'http://storage.googleapis.com/brightid-backups/'
 OUTPUT_FOLDER = './outputs/24_hours_test/'

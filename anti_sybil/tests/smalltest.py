@@ -1,8 +1,8 @@
 # test effect of running sybil rank on graph of groups instead of graph of individuals
 
-import algorithms
+from anti_sybil import algorithms
 import copy
-from utils import *
+from anti_sybil.utils import *
 
 OUTPUT_FOLDER = './outputs/smalltest/'
 

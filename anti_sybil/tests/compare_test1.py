@@ -1,15 +1,11 @@
-import sys
-sys.path.append('../')
+# compare the result of SybilGroupRank algorithm with stupid sybil border option and without
 
 from anti_sybil.utils import *
-import algorithms
+from anti_sybil import algorithms
 import copy
 import os
 
-
 OUTPUT_FOLDER = './outputs/compare_test1/'
-
-# compare the result of SybilGroupRank algorithm with stupid sybil border option and without
 
 # load graph from the backup
 graph = graphs.generators.brightid_backup.generate({
