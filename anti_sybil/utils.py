@@ -191,7 +191,7 @@ def from_dump(f):
     for c in connections.values():
         ret['edges'].append([c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
     ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
-    ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['createdAt'])
+    ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['createdAt'], reverse=True)
     return json.dumps(ret)
 
 
