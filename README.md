@@ -4,7 +4,7 @@ This package provides a framework to generate different types of test graphs and
 
 ### Prerequisite
 
-- Python2.7
+- Python3.7
 
 ### Install
 
