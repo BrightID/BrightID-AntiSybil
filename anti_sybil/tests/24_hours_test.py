@@ -29,6 +29,7 @@ def find_border(graph):
 
 def main():
     outputs = []
+    scores_dic = None
     if not os.path.exists('{}temp'.format(OUTPUT_FOLDER)):
         os.makedirs('{}temp'.format(OUTPUT_FOLDER))
     r = requests.get(BACKUP_URL)
@@ -53,6 +54,8 @@ def main():
         zip_addr = '{0}temp/brightid{1}.zip'.format(OUTPUT_FOLDER, i)
         json_graph = from_dump(zip_addr)
         graph = from_json(json_graph)
+        if not scores_dic:
+            scores_dic = {k.name: [] for k in list(graph.nodes)}
         border = find_border(graph)
         print('border', border)
         reset_ranks(graph)
@@ -60,14 +63,21 @@ def main():
             'stupid_sybil_border': border
         })
         ranker.rank()
+        for n in ranker.graph.nodes():
+            if n.name in scores_dic:
+                scores_dic[n.name].append(n.rank)
 
         outputs.append(generate_output(
             ranker.graph, 'SybilRank\n{}'.format(l[1])))
         draw_graph(ranker.graph, os.path.join(
             OUTPUT_FOLDER, 'graph{}.html'.format(i)))
-
     write_output_file(outputs, os.path.join(
         OUTPUT_FOLDER, 'result.csv'))
+
+    for n in scores_dic:
+        print(n)
+        print(scores_dic[n])
+        print('*' * 100)
 
 
 if __name__ == '__main__':
