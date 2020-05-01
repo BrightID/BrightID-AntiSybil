@@ -75,7 +75,7 @@ class GroupSybilRank(sybil_rank.SybilRank):
         final_nodes_rank = {}
         for node, rank in iter(nodes_rank.items()):
             node_degree = self.graph.degree(node)
-            final_nodes_rank[node] = sum(nodes_rank[node].values()) / float(node_degree)
+            final_nodes_rank[node] = sum(nodes_rank[node].values()) / float(node_degree) if node_degree else 0
         ranks = sorted(iter(final_nodes_rank.items()),
                        key=operator.itemgetter(1))
         if self.options['nonlinear_distribution']:
