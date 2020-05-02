@@ -3,6 +3,7 @@ import random
 from anti_sybil import algorithms
 from anti_sybil.graphs.node import Node
 from anti_sybil.utils import *
+import copy
 
 OUTPUT_FOLDER = './outputs/single_attacker/'
 
@@ -185,19 +186,19 @@ def main():
     ranker.rank()
 
     # targeting seeds
-    _graph = targeting_seeds(graph, 5, 50)
+    _graph = targeting_seeds(copy.deepcopy(graph), 5, 50)
     tests(_graph, 'targeting seeds', 'targeting_seeds')
 
     # targeting top ranked nodes
-    _graph = targeting_honest(graph, 5, 50, True)
+    _graph = targeting_honest(copy.deepcopy(graph), 5, 50, True)
     tests(_graph, 'targeting top nodes', 'targeting_top_nodes')
 
     # random attack
-    _graph = targeting_honest(graph, 5, 50, False)
+    _graph = targeting_honest(copy.deepcopy(graph), 5, 50, False)
     tests(_graph, 'random', 'random')
 
     # group target attack
-    _graph = group_attack(graph, 50, 100, 200)
+    _graph = group_attack(copy.deepcopy(graph), 50, 100, 200)
     tests(_graph, 'group target attack', 'group_target_attack')
 
     write_output_file(outputs, os.path.join(OUTPUT_FOLDER, 'result.csv'))
