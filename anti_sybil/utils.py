@@ -53,6 +53,8 @@ def calculate_successful_sybils(ranks_dic):
             honests.extend(ranks_dic[category])
         elif category == 'Attacker':
             attackers.extend(ranks_dic[category])
+    if sybils:
+        honests = [h for h in honests if h]
     honests.sort()
     # for limit in [.8, .9, 1]:
     #     successful_sybils = [rank for rank in sybils if rank >= min(
