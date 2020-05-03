@@ -5,7 +5,7 @@ from anti_sybil.graphs.node import Node
 from anti_sybil.utils import *
 import copy
 
-OUTPUT_FOLDER = './outputs/single_attacker/'
+OUTPUT_FOLDER = './outputs/lone_attackers/'
 
 SYBIL_RANK = True
 SYBIL_GROUP_RANK = True
