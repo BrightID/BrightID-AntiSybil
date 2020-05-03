@@ -16,7 +16,7 @@ outputs = []
 
 algorithm_options = {
     'accumulative': False,
-    'nonlinear_distribution': True,
+    'nonlinear_distribution': False,
     'group_edge_weight': 20,
     'thresholds': [.36, .24, .18, .12, .06, .04, .02, .01, .005, .004, .003, .002, .0015, .001, .0005, 0]
 }
@@ -94,7 +94,7 @@ def targeting_honest(graph, num_honests, num_sybils, top=True, stitches=0):
     return graph
 
 
-# The attacker connects to one top honest and propagates the score by creating multiple groups
+# One attacker connects to one top honest and propagates the score by creating multiple groups
 # Create m Sybil nodes
 def group_attack(graph, num_sybils, num_groups, stitches):
     edges = []
@@ -129,6 +129,37 @@ def group_attack(graph, num_sybils, num_groups, stitches):
             'target_attack_{}'.format(i))
         nodes_dic[random.choice(sybils)].groups.add(
             'target_attack_{}'.format(i))
+
+    # updating graph
+    graph.add_edges_from(edges)
+    return graph
+
+
+# One Seed or Honest attacks
+# Create m Sybil nodes
+def collsion_attack(graph, attacker_type, num_sybils, stitches=0):
+    edges = []
+    sybils = []
+    if attacker_type == 'Seed':
+        attacker = sorted([n for n in graph.nodes if n.node_type ==
+                           'Seed'], key=lambda n: n.rank, reverse=True)[0]
+    elif attacker_type == 'Honest':
+        attacker = sorted([n for n in graph.nodes if n.node_type !=
+                           'Seed'], key=lambda n: n.rank, reverse=True)[0]
+
+    nodes_dic = {node.name: node for node in graph.nodes}
+
+    # making sybils and connecting them to the attackers
+    for i in range(num_sybils):
+        nodes_dic['s-{0}'.format(i)] = Node(
+            's-{0}'.format(i), 'Sybil', groups=set(['seeds_as_attacker']))
+        sybils.append('s-{0}'.format(i))
+        edges.append((nodes_dic['s-{0}'.format(i)], nodes_dic[attacker.name]))
+
+    # connecting sybils together
+    for i in range(stitches):
+        edges.append((nodes_dic[random.choice(sybils)],
+                      nodes_dic[random.choice(sybils)]))
 
     # updating graph
     graph.add_edges_from(edges)
@@ -185,21 +216,29 @@ def main():
     ranker = algorithms.SybilGroupRank(graph, algorithm_options)
     ranker.rank()
 
-    # targeting seeds
+    # one attacker targeting seeds
     _graph = targeting_seeds(copy.deepcopy(graph), 5, 50)
     tests(_graph, 'targeting seeds', 'targeting_seeds')
 
-    # targeting top ranked nodes
+    #  one attacker targeting top ranked nodes
     _graph = targeting_honest(copy.deepcopy(graph), 5, 50, True)
     tests(_graph, 'targeting top nodes', 'targeting_top_nodes')
 
-    # random attack
+    #  one attacker random attack
     _graph = targeting_honest(copy.deepcopy(graph), 5, 50, False)
     tests(_graph, 'random', 'random')
 
-    # group target attack
-    _graph = group_attack(copy.deepcopy(graph), 50, 100, 200)
+    #  one attacker targeting top ranked node by creating groups
+    _graph = group_attack(copy.deepcopy(graph), 50, 50, 200)
     tests(_graph, 'group target attack', 'group_target_attack')
+
+    # one seed node attacking
+    _graph = collsion_attack(copy.deepcopy(graph), 'Seed', 50, 0)
+    tests(_graph, 'seed node attack', 'seed_node_attack')
+
+    # one honest node attacking
+    _graph = collsion_attack(copy.deepcopy(graph), 'Honest', 50, 0)
+    tests(_graph, 'honest node attack', 'honest_node_attack')
 
     write_output_file(outputs, os.path.join(OUTPUT_FOLDER, 'result.csv'))
 
