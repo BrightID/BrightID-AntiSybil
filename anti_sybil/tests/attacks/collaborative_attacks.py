@@ -1,5 +1,6 @@
 from anti_sybil.graphs.node import Node
 from anti_sybil import algorithms
+import matplotlib.pyplot as plt
 from anti_sybil.utils import *
 import random
 import copy
@@ -7,12 +8,13 @@ import os
 
 OUTPUT_FOLDER = './outputs/collaborative_attacks/'
 
-SYBIL_RANK = False
+SYBIL_RANK = True
 SYBIL_GROUP_RANK = True
-INTRA_GROUP_WEIGHT = False
+INTRA_GROUP_WEIGHT = True
 GROUP_MERGE = False
 
 outputs = []
+charts = {'SR': [], 'SGR': [], 'IGW': [], 'GM': []}
 
 algorithm_options = {
     'accumulative': False,
@@ -237,6 +239,38 @@ def collsion_attack(
     return graph
 
 
+def successful_honests(graph):
+    honests = []
+    sybils = []
+    for node in graph.nodes:
+        if node.node_type in ['Sybil', 'Non Bridge Sybil', 'Bridge Sybil']:
+            sybils.append(node.rank)
+        if node.node_type in ['Seed', 'Honest'] and node.rank:  # ?Attacker
+            honests.append(node.rank)
+    honests.sort()
+    avg_sybils = sum(sybils) / len(sybils)
+    return (1 - (bisect(honests, avg_sybils) / len(honests))) * 100
+
+
+def plot():
+    fig, ax = plt.subplots()
+    for i, chart in enumerate(charts):
+        if not charts[chart]:
+            continue
+        ax.plot(
+            [p[0] for p in charts[chart]],
+            [p[1] for p in charts[chart]],
+            'go--',
+            color='C{}'.format(i),
+            label='= {}'.format(chart),
+        )
+    ax.legend()
+    plt.title('Collaborative Attacks')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUTPUT_FOLDER, 'algorithms.png'))
+
+
 def tests(graph, description, file_name):
     global outputs
 
@@ -248,6 +282,7 @@ def tests(graph, description, file_name):
             graph, 'SybilRank\n{}'.format(description)))
         draw_graph(graph, os.path.join(
             OUTPUT_FOLDER, 'SR_{}.html'.format(file_name)))
+        charts['SR'].append([file_name, successful_honests(graph)])
 
     if SYBIL_GROUP_RANK:
         reset_ranks(graph)
@@ -257,6 +292,7 @@ def tests(graph, description, file_name):
             graph, 'SybilGroupRank\n{}'.format(description)))
         draw_graph(graph, os.path.join(
             OUTPUT_FOLDER, 'SGR_{}.html'.format(file_name)))
+        charts['SGR'].append([file_name, successful_honests(graph)])
 
     if INTRA_GROUP_WEIGHT:
         reset_ranks(graph)
@@ -266,6 +302,7 @@ def tests(graph, description, file_name):
             graph, 'IntraGroupWeight\n{}'.format(description)))
         draw_graph(graph, os.path.join(
             OUTPUT_FOLDER, 'IGW_{}.html'.format(file_name)))
+        charts['IGW'].append([file_name, successful_honests(graph)])
 
     if GROUP_MERGE:
         reset_ranks(graph)
@@ -275,6 +312,7 @@ def tests(graph, description, file_name):
             graph, 'GroupMerge\n{}'.format(description)))
         draw_graph(graph, os.path.join(
             OUTPUT_FOLDER, 'GM_{}.html'.format(file_name)))
+        charts['GM'].append([file_name, successful_honests(graph)])
 
 
 def main():
@@ -311,6 +349,7 @@ def main():
     _graph = collsion_attack(copy.deepcopy(graph), 'Honest', 5, 10, False, 0)
     tests(_graph, 'honest node attack', 'honest_node_attack')
 
+    plot()
     write_output_file(outputs, os.path.join(OUTPUT_FOLDER, 'result.csv'))
 
 
