@@ -57,7 +57,7 @@ class SybilGroupRank(sybil_rank.SybilRank):
         pairs = itertools.combinations(self.groups.keys(), 2)
         pairs = sorted([(f, t) if f < t else (t, f)
                         for f, t in pairs], key=lambda pair: str(pair))
-        removed_edges = set()
+        # removed_edges = set()
         for source_group, target_group in pairs:
             removed = set()
             weight = 0
@@ -85,11 +85,11 @@ class SybilGroupRank(sybil_rank.SybilRank):
                     if not self.graph.has_edge(source_node, target_node):
                         continue
                     # an edge only count once as group connection
-                    if (source_node, target_node) in removed_edges or (target_node, source_node) in removed_edges:
-                        continue
+                    # if (source_node, target_node) in removed_edges or (target_node, source_node) in removed_edges:
+                    #     continue
                     removed.add(source_node)
                     removed.add(target_node)
-                    removed_edges.add((source_node, target_node))
+                    # removed_edges.add((source_node, target_node))
                     weight += 1
             if weight > 0:
                 num = len(source_nodes) + len(target_nodes)
