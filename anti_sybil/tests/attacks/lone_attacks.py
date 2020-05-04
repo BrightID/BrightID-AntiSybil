@@ -5,11 +5,11 @@ from anti_sybil.graphs.node import Node
 from anti_sybil.utils import *
 import copy
 
-OUTPUT_FOLDER = './outputs/lone_attackers/'
+OUTPUT_FOLDER = './outputs/lone_attacks/'
 
-SYBIL_RANK = True
+SYBIL_RANK = False
 SYBIL_GROUP_RANK = True
-INTRA_GROUP_WEIGHT = True
+INTRA_GROUP_WEIGHT = False
 GROUP_MERGE = False
 
 outputs = []
