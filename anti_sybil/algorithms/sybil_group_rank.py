@@ -11,7 +11,7 @@ class SybilGroupRank(sybil_rank.SybilRank):
         self.min_group_req = self.options.get('min_group_req', 1)
         groups = {}
         for node in self.graph.nodes:
-            for group in node.groups:
+            for group in sorted(list(node.groups)):
                 if group not in groups:
                     groups[group] = []
                 groups[group].append(node)
