@@ -16,10 +16,11 @@ SYBIL_RANK = True
 SYBIL_GROUP_RANK = True
 INTRA_GROUP_WEIGHT = True
 GROUP_MERGE = False
+WEIGHTED_SYBIL_RANK = True
 
 outputs = manager.list()
 charts = manager.dict({'SR': manager.dict(), 'SGR': manager.dict(
-), 'IGW': manager.dict(), 'GM': manager.dict()})
+), 'IGW': manager.dict(), 'GM': manager.dict(), 'WSR': manager.dict()})
 
 algorithm_options = {
     'accumulative': False,
@@ -69,6 +70,16 @@ def tests(graph, description, file_name, outputs, charts):
         draw_graph(graph, os.path.join(
             OUTPUT_FOLDER, 'GM_{}.html'.format(file_name)))
         charts['GM'][file_name] = successful_honests(graph)
+
+    if WEIGHTED_SYBIL_RANK:
+        reset_ranks(graph)
+        ranker = algorithms.WeightedSybilRank(graph, algorithm_options)
+        ranker.rank()
+        outputs.append(generate_output(
+            graph, 'WeightedSybilRank\n{}'.format(description)))
+        draw_graph(graph, os.path.join(
+            OUTPUT_FOLDER, 'WSR_{}.html'.format(file_name)))
+        charts['WSR'][file_name] = successful_honests(graph)
 
 
 def successful_honests(graph):
