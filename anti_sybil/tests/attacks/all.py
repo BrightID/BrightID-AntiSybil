@@ -8,8 +8,6 @@ import copy
 import time
 import os
 
-manager = multiprocessing.Manager()
-
 OUTPUT_FOLDER = './outputs/all_attacks/'
 
 SYBIL_RANK = True
@@ -18,6 +16,7 @@ INTRA_GROUP_WEIGHT = True
 GROUP_MERGE = False
 WEIGHTED_SYBIL_RANK = True
 
+manager = multiprocessing.Manager()
 outputs = manager.list()
 charts = manager.dict({'SR': manager.dict(), 'SGR': manager.dict(
 ), 'IGW': manager.dict(), 'GM': manager.dict(), 'WSR': manager.dict()})
@@ -28,6 +27,12 @@ algorithm_options = {
     'group_edge_weight': 20,
     'thresholds': [.36, .24, .18, .12, .06, .04, .02, .01, .005, .004, .003, .002, .0015, .001, .0005, 0]
 }
+
+N_TARGETS = 5
+N_SYBILS = 50
+N_ATTACKERS = 5
+N_STITCHES = 0
+N_GROUPS = 50
 
 
 def tests(graph, description, file_name, outputs, charts):
@@ -132,97 +137,103 @@ def main():
     inputs = []
 
     # one attacker targeting seeds
-    _graph = lone.targeting_seeds(copy.deepcopy(graph), 5, 50)
+    _graph = lone.targeting_seeds(copy.deepcopy(
+        graph), N_TARGETS, N_SYBILS, stitches=N_STITCHES)
     inputs.append([_graph, 'targeting seeds',
                    'lone_targeting_seeds', outputs, charts])
 
     # one attacker targeting top-ranked honests
-    _graph = lone.targeting_honest(copy.deepcopy(graph), 5, 50, True)
+    _graph = lone.targeting_honest(copy.deepcopy(
+        graph), N_TARGETS, N_SYBILS, top=True, stitches=N_STITCHES)
     inputs.append([_graph, 'targeting top nodes',
                    'lone_targeting_top_nodes', outputs, charts])
 
     # one attacker targeting random honests
-    _graph = lone.targeting_honest(copy.deepcopy(graph), 5, 50, False)
+    _graph = lone.targeting_honest(copy.deepcopy(
+        graph), N_TARGETS, N_SYBILS, top=False, stitches=N_STITCHES)
     inputs.append([_graph, 'random', 'lone_random', outputs, charts])
 
     # one attacker targeting a top-ranked honest (by creating groups)
-    _graph = lone.group_attack(copy.deepcopy(graph), 50, 50, 200)
+    _graph = lone.group_attack(copy.deepcopy(
+        graph), N_SYBILS, N_GROUPS, stitches=100)
     inputs.append([_graph, 'group target attack',
                    'lone_group_target_attack', outputs, charts])
 
     # one seed as an attacker
-    _graph = lone.collsion_attack(copy.deepcopy(graph), 'Seed', 50, 0)
+    _graph = lone.collsion_attack(copy.deepcopy(
+        graph), 'Seed', N_SYBILS, stitches=N_STITCHES)
     inputs.append([_graph, 'seed node attack',
                    'lone_seed_node_attack', outputs, charts])
 
     # one honest as an attacker
-    _graph = lone.collsion_attack(copy.deepcopy(graph), 'Honest', 50, 0)
+    _graph = lone.collsion_attack(copy.deepcopy(
+        graph), 'Honest', N_SYBILS, stitches=N_STITCHES)
     inputs.append([_graph, 'honest node attack',
                    'lone_honest_node_attack', outputs, charts])
 
-    # A team of attackers
+    # a team of attackers
     # a team of attackers targeting seeds
-    _graph = collaborative.targeting_seeds(
-        copy.deepcopy(graph), 3, 3, 9, True, 10)
+    _graph = collaborative.targeting_seeds(copy.deepcopy(
+        graph), N_ATTACKERS, N_TARGETS, N_SYBILS, one_group=True, stitches=N_STITCHES)
     inputs.append([_graph, 'targeting seeds',
                    'one_group_targeting_seeds', outputs, charts])
 
     # a team of attackers targeting top-ranked honests
-    _graph = collaborative.targeting_honest(
-        copy.deepcopy(graph), 3, 3, 9, True, True, 0)
+    _graph = collaborative.targeting_honest(copy.deepcopy(
+        graph), N_ATTACKERS, N_TARGETS, N_SYBILS, one_group=True, top=True, stitches=N_STITCHES)
     inputs.append([_graph, 'targeting top nodes',
                    'one_group_targeting_top_nodes', outputs, charts])
 
     # a team of attackers targeting random honests
-    _graph = collaborative.targeting_honest(
-        copy.deepcopy(graph), 3, 3, 9, True, False, 0)
+    _graph = collaborative.targeting_honest(copy.deepcopy(
+        graph), N_ATTACKERS, N_TARGETS, N_SYBILS, one_group=True, top=False, stitches=N_STITCHES)
     inputs.append([_graph, 'random', 'one_group_random', outputs, charts])
 
     # a team of attackers targeting top-ranked honests (by creating groups)
-    _graph = collaborative.group_attack(
-        copy.deepcopy(graph), 5, 5, 10, 20, 100)
+    _graph = collaborative.group_attack(copy.deepcopy(
+        graph), N_ATTACKERS, N_TARGETS, N_SYBILS, N_GROUPS, stitches=100)
     inputs.append([_graph, 'group target attack',
                    'one_group_group_target_attack', outputs, charts])
 
     # a team of seeds as attackers
     _graph = collaborative.collsion_attack(
-        copy.deepcopy(graph), 'Seed', 5, 10, True, 10)
+        copy.deepcopy(graph), 'Seed', N_ATTACKERS, N_SYBILS, one_group=True, stitches=N_STITCHES)
     inputs.append([_graph, 'seed node attack',
                    'one_group_seed_node_attack', outputs, charts])
 
     # a team of honests as attackers
     _graph = collaborative.collsion_attack(
-        copy.deepcopy(graph), 'Honest', 5, 10, True, 0)
+        copy.deepcopy(graph), 'Honest', N_ATTACKERS, N_SYBILS, one_group=True, stitches=N_STITCHES)
     inputs.append([_graph, 'honest node attack',
                    'one_group_honest_node_attack', outputs, charts])
 
     # some teams of attackers
     # some teams of attackers targeting seeds
-    _graph = collaborative.targeting_seeds(
-        copy.deepcopy(graph), 3, 3, 9, False, 10)
+    _graph = collaborative.targeting_seeds(copy.deepcopy(
+        graph), N_ATTACKERS, N_TARGETS, N_SYBILS, one_group=False, stitches=N_STITCHES)
     inputs.append([_graph, 'targeting seeds',
                    'some_groups_targeting_seeds', outputs, charts])
 
     # some teams of attackers targeting top-ranked honests
-    _graph = collaborative.targeting_honest(
-        copy.deepcopy(graph), 3, 3, 9, False, True, 0)
+    _graph = collaborative.targeting_honest(copy.deepcopy(
+        graph), N_ATTACKERS, N_TARGETS, N_SYBILS, one_group=False, top=True, stitches=N_STITCHES)
     inputs.append([_graph, 'targeting top nodes',
                    'some_groups_targeting_top_nodes', outputs, charts])
 
     # some teams of attackers targeting random honests
-    _graph = collaborative.targeting_honest(
-        copy.deepcopy(graph), 3, 3, 9, False, False, 0)
+    _graph = collaborative.targeting_honest(copy.deepcopy(
+        graph), N_ATTACKERS, N_TARGETS, N_SYBILS, one_group=False, top=False, stitches=N_STITCHES)
     inputs.append([_graph, 'random', 'some_groups_random', outputs, charts])
 
     # some teams of seeds as attackers
     _graph = collaborative.collsion_attack(
-        copy.deepcopy(graph), 'Seed', 5, 10, False, 10)
+        copy.deepcopy(graph), 'Seed', N_ATTACKERS, N_SYBILS, one_group=False, stitches=N_STITCHES)
     inputs.append([_graph, 'seed node attack',
                    'some_groups_seed_node_attack', outputs, charts])
 
     # some teams of honests as attackers
     _graph = collaborative.collsion_attack(
-        copy.deepcopy(graph), 'Honest', 5, 10, False, 0)
+        copy.deepcopy(graph), 'Honest', N_ATTACKERS, N_SYBILS, one_group=False, stitches=N_STITCHES)
     inputs.append([_graph, 'honest node attack',
                    'some_groups_honest_node_attack', outputs, charts])
 
