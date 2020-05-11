@@ -1,10 +1,5 @@
-import os
-import random
-from anti_sybil import algorithms
 from anti_sybil.graphs.node import Node
-import matplotlib.pyplot as plt
-from anti_sybil.utils import *
-import copy
+import random
 
 
 # the attacker connects to the seeds
