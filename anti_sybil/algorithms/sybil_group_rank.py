@@ -68,9 +68,6 @@ class SybilGroupRank(sybil_rank.SybilRank):
                 target_nodes = filter(lambda n: len(
                     n.groups) >= self.min_group_req, target_nodes)
             for source_node in source_nodes:
-                # don't count intergroup connections as groups connection
-                if source_node in target_nodes:
-                    continue
                 if source_node in removed:
                     continue
                 for target_node in target_nodes:
@@ -78,20 +75,19 @@ class SybilGroupRank(sybil_rank.SybilRank):
                         break
                     if target_node in removed:
                         continue
-                    # don't count intergroup connections as groups connection
-                    if target_node in source_nodes:
-                        continue
                     if not self.graph.has_edge(source_node, target_node):
                         continue
                     removed.add(source_node)
                     removed.add(target_node)
+
                     # set number of common neighbors as the weight of the edge (trustworthy of connection)
                     n1 = self.graph.neighbors(source_node)
                     n2 = self.graph.neighbors(target_node)
                     edge_weight = len(set(list(n1)) & set(list(n2)))
                     weight += edge_weight
+
             if weight > 0:
                 num = len(source_nodes) + len(target_nodes)
                 group_graph.add_edge(
-                    groups_dic[source_group], groups_dic[target_group], weight=1.0 * weight / num)
+                    groups_dic[source_group], groups_dic[target_group], weight=weight / num)
         return group_graph
