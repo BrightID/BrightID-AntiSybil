@@ -1,7 +1,6 @@
 import os
 import random
 from anti_sybil import algorithms
-import inconsistency
 from anti_sybil.graphs.node import Node
 from anti_sybil.utils import *
 from collections import OrderedDict
@@ -38,7 +37,6 @@ algorithm_options = {
     'min_degree': 5,
     'nonlinear_distribution': True,
     'group_edge_weight': 20,
-    'weaken_inconsistency_ratio': .1,
     'min_neighborhood_factor': 5,
     'min_reliable_rank': 20,
     'thresholds': [.36, .24, .18, .12, .06, .04, .02, .01, .005, .004, .003, .002, .0015, .001, .0005, 0]
@@ -80,10 +78,6 @@ reset_ranks(graph)
 # recalculating ranks
 ranker = algorithms.SybilGroupRank(graph, algorithm_options)
 ranker.rank()
-inconsistencies = inconsistency.calculate(ranker.graph, ranker.group_graph)
-print('Group\t\tInconsistency')
-for group, inconsistency_score in inconsistencies:
-    print("{0} \t{1:.4f}".format(group, inconsistency_score))
 outputs.append(generate_output(graph))
 draw_graph(graph, os.path.join(OUTPUT_FOLDER, 'nodes.html'))
 draw_graph(ranker.group_graph,
