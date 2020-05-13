@@ -20,7 +20,6 @@ def write_output_file(outputs, file_name):
     for title in outputs[0]:
         if title != 'name':
             rows.append([title] + [output.get(title, '') for output in outputs])
-
     with open(file_name, 'w') as f:
         writer = csv.writer(f)
         for row in rows:
@@ -63,23 +62,26 @@ def calculate_successful_sybils(ranks_dic):
     #         (len(successful_sybils) * 100.0) / max(1, len(sybils)), 2)
     # if len(attackers) != 0:
     #     result['successful_sybils_per_attacker'] = round(
-    #         float(len(successful_sybils)) / len(attackers), 2)
+    #         len(successful_sybils) / len(attackers), 2)
     # else:
     #     result['successful_sybils_per_attacker'] = '__'
-    result['better_than_pct'] = float(bisect(honests, max(sybils) if sybils else 0)) / len(honests)
+    result['better_than_pct'] = bisect(honests, max(sybils) if sybils else 0) / len(honests)
     return result
 
 
 def calculate_successful_honest(ranks_dic):
     honests = []
-    attackers = []
+    sybils = []
     result = {}
     for category in ranks_dic:
-        if category in ['Seed', 'Honest']:
+        if category in ['Sybil', 'Non Bridge Sybil', 'Bridge Sybil']:
+            sybils.extend(ranks_dic[category])
+        elif category in ['Seed', 'Honest']:
             honests.extend(ranks_dic[category])
-    honests.sort(reverse=True)
-    for limit in [.1, .2]:
-        result['min_{0}'.format(limit)] =  min(honests[:int((1 - limit) * len(honests))])
+    avg_sybils = sum(sybils) / len(sybils) if sybils else 0
+    successful_honest = len([h for h in honests if h > avg_sybils])
+    result['no'] = successful_honest
+    result['percent'] = successful_honest / len(honests) * 100
     return result
 
 
@@ -92,14 +94,13 @@ def generate_output(graph, name=''):
     output = collections.OrderedDict()
     output['name'] = name
     successful_sybils = calculate_successful_sybils(ranks_dic)
-    # successful_honests = calculate_successful_honest(ranks_dic)
+    successful_honests = calculate_successful_honest(ranks_dic)
     # output['Successful Sybils Percentage'] = successful_sybils['successful_sybils_percent_1']
     # output['Successful Sybils Percentage (-10 percent of honests)'] = successful_sybils['successful_sybils_percent_0.9']
     # output['Successful Sybils Percentage (-20 percent of honests)'] = successful_sybils['successful_sybils_percent_0.8']
     # output['Successful Sybils per Attacker'] = successful_sybils['successful_sybils_per_attacker']
-    # output['Min 90 Percent'] = successful_honests['min_0.1']
-    # output['Min 80 Percent'] = successful_honests['min_0.2']
-
+    output['No. Successful Honests'] = successful_honests['no']
+    output['Successful Honests Percent'] = successful_honests['percent']
     output['Sybils scored >= %'] = successful_sybils['better_than_pct']
     output['Avg Honest - Avg Sybil'] = None
     view_order = ('Seed', 'Honest', 'Attacker',
@@ -171,7 +172,7 @@ def zip2dict(f, table):
             d[o['data']['_key']] = o['data']
         elif o['type'] == 2302 and o['data']['_key'] in d:
             del d[o['data']['_key']]
-    return dict((d[k]['_id'].replace(table+'/', ''), d[k]) for k in d)
+    return dict((d[k]['_id'].replace(table + '/', ''), d[k]) for k in d)
 
 
 def from_dump(f):
@@ -180,7 +181,6 @@ def from_dump(f):
     groups = zip2dict(f, 'groups')
     connections = zip2dict(f, 'connections')
     ret = {'nodes': [], 'edges': []}
-    buf = {}
     for u in users:
         users[u] = {'node_type': 'Honest', 'rank': 0, 'name': u , 'groups': [], 'createdAt':users[u]['createdAt']}
         ret['nodes'].append(users[u])
