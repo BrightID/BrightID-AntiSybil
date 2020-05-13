@@ -1,4 +1,4 @@
-OUTPUT_FOLDER = './outputs/attacks/'
+OUTPUT_FOLDER = './outputs/simple_attacks/'
 INPUT_FOLDER = './inputs/'
 BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
 
