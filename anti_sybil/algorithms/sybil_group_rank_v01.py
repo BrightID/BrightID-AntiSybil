@@ -1,7 +1,7 @@
 from . import sybil_rank
 import networkx as nx
 import itertools
-from anti_sybil.graphs.node import Node
+from anti_sybil.templates.node import Node
 
 
 class SybilGroupRank(sybil_rank.SybilRank):
@@ -39,7 +39,7 @@ class SybilGroupRank(sybil_rank.SybilRank):
         flag = set([node.node_type for node in group_nodes])
         if flag == set(['Seed']):
             group_type = 'Seed'
-        elif flag == set(['Sybil', 'Attacker']):
+        elif flag == set(['Sybil', 'Attacker']) or flag == set(['Sybil']):
             group_type = 'Sybil'
         else:
             group_type = 'Honest'
