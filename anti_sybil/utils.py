@@ -1,14 +1,16 @@
+from bisect import bisect
 import networkx as nx
-import collections
 import zipfile
 import tarfile
+import requests
 import json
 import csv
 import os
-from . import graphs
-from bisect import bisect
+from . import algorithms
+from . import templates
 
-TEMPLATE = TEMPLATE2 = None
+GRAPH_TEMPLATE = COMPARE_GRAPH_TEMPLATE = None
+BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
 
 
 def write_output_file(outputs, file_name):
@@ -91,7 +93,7 @@ def generate_output(graph, name=''):
     for category in categories:
         ranks_dic[category] = [
             node.rank if node.rank else 0 for node in graph.nodes if node.node_type == category]
-    output = collections.OrderedDict()
+    output = {}
     output['name'] = name
     successful_sybils = calculate_successful_sybils(ranks_dic)
     successful_honests = calculate_successful_honest(ranks_dic)
@@ -132,8 +134,12 @@ def save_graph(file_name, graph):
 def to_json(graph):
     data = {'nodes': [], 'edges': []}
     for node in graph.nodes():
-        data['nodes'].append({'name': node.name, 'node_type': node.node_type, 'groups': list(
-            node.groups), 'rank': node.rank})
+        data['nodes'].append({
+            'name': node.name,
+            'node_type': node.node_type,
+            'groups': list(node.groups),
+            'rank': node.rank
+        })
     for edge in graph.edges():
         data['edges'].append((edge[0].name, edge[1].name))
     return json.dumps(data)
@@ -151,7 +157,7 @@ def from_json(data):
     nodes = {}
     for node in data['nodes']:
         groups = set(node['groups']) if node['groups'] else None
-        nodes[node['name']] = graphs.node.Node(
+        nodes[node['name']] = templates.node.Node(
             node['name'], node['node_type'], groups, node['rank'])
         graph.add_node(nodes[node['name']])
     graph.add_edges_from([(nodes[edge[0]], nodes[edge[1]])
@@ -198,29 +204,29 @@ def from_dump(f):
 
 
 def draw_graph(graph, file_name):
-    global TEMPLATE
-    if not TEMPLATE:
+    global GRAPH_TEMPLATE
+    if not GRAPH_TEMPLATE:
         abspath = os.path.abspath(__file__)
         dname = os.path.dirname(abspath)
-        with open(os.path.join(dname, 'template.html')) as f:
-            TEMPLATE = f.read()
+        with open(os.path.join(dname, './templates/graph.html')) as f:
+            GRAPH_TEMPLATE = f.read()
     dname = os.path.dirname(file_name)
     if dname and not os.path.exists(dname):
         os.makedirs(dname)
     json_dic = to_json(graph)
-    edited_string = TEMPLATE.replace('JSON_GRAPH', json_dic)
+    edited_string = GRAPH_TEMPLATE.replace('JSON_GRAPH', json_dic)
     with open(file_name, 'w') as output_file:
         output_file.write(edited_string)
     return edited_string
 
 
 def draw_compare_graph(graph1, graph2, file_name):
-    global TEMPLATE2
-    if not TEMPLATE2:
+    global COMPARE_GRAPH_TEMPLATE
+    if not COMPARE_GRAPH_TEMPLATE:
         abspath = os.path.abspath(__file__)
         dname = os.path.dirname(abspath)
-        with open(os.path.join(dname, 'template2.html')) as f:
-            TEMPLATE2 = f.read()
+        with open(os.path.join(dname, './templates/compare_graph.html')) as f:
+            COMPARE_GRAPH_TEMPLATE = f.read()
     dname = os.path.dirname(file_name)
     if dname and not os.path.exists(dname):
         os.makedirs(dname)
@@ -228,7 +234,7 @@ def draw_compare_graph(graph1, graph2, file_name):
         node2 = next(filter(lambda n: n.name == node.name, graph2.nodes))
         node.rank = '{0}-{1}'.format(int(node.rank), int(node2.rank))
     graph_json = to_json(graph1)
-    edited_string = TEMPLATE2.replace('JSON_GRAPH', graph_json)
+    edited_string = COMPARE_GRAPH_TEMPLATE.replace('JSON_GRAPH', graph_json)
     with open(file_name, 'w') as output_file:
         output_file.write(edited_string)
     return edited_string
@@ -250,3 +256,37 @@ def tar_to_zip(fin, fout):
             zipf.writestr(m.name, f.read())
     tarf.close()
     zipf.close()
+
+
+def load_brightid_graph(data):
+    if not os.path.exists(data['file_path']):
+        os.makedirs(data['file_path'])
+    rar_addr = os.path.join(data['file_path'], 'brightid.tar.gz')
+    zip_addr = os.path.join(data['file_path'], 'brightid.zip')
+    backup = requests.get(BACKUP_URL)
+    with open(rar_addr, 'wb') as f:
+        f.write(backup.content)
+    tar_to_zip(rar_addr, zip_addr)
+    json_graph = from_dump(zip_addr)
+    graph = from_json(json_graph)
+    return graph
+
+
+def stupid_sybil_border(graph):
+    reset_ranks(graph)
+    ranker = algorithms.SybilGroupRank(graph)
+    ranker.rank()
+    attacker = max(graph.nodes, key=lambda node: node.rank)
+    attacker.groups.add('stupid_sybil')
+    sybil1 = templates.node.Node('stupid_sybil_1', 'Sybil', set(['stupid_sybil']))
+    sybil2 = templates.node.Node('stupid_sybil_2', 'Sybil', set(['stupid_sybil']))
+    graph.add_edge(attacker, sybil1)
+    graph.add_edge(attacker, sybil2)
+    reset_ranks(graph)
+    ranker = algorithms.SybilGroupRank(graph)
+    ranker.rank()
+    border = max(sybil1.raw_rank, sybil2.raw_rank)
+    graph.remove_nodes_from([sybil1, sybil2])
+    attacker.groups.remove('stupid_sybil')
+    reset_ranks(graph)
+    return border

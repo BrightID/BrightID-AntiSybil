@@ -1,0 +1,352 @@
+<html>
+  <head>
+    <title>BrightID Graph</title>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src = "http://d3js.org/d3.v3.min.js"></script>
+    <script>
+      graph_json = 'JSON_GRAPH'
+    </script>
+    <script>
+      function draw_graph(server_graph, color, clickHandler) {
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+
+        var focus_node = null,
+          highlight_node = null;
+
+        var outline = false;
+
+        var highlight_color = "blue";
+        var highlight_trans = 0.1;
+
+        var size = d3.scale.pow().exponent(1)
+          .domain([1, 100])
+          .range([8, 24]);
+
+        var force = d3.layout.force()
+          .linkDistance(60)
+          .charge(-300)
+        .size([w,h]);
+
+        var default_node_color = "#ccc";
+        //var default_node_color = "rgb(3,190,100)";
+        var default_link_color = "brown";
+        var nominal_base_node_size = 12;
+        var nominal_stroke = .5;
+        var max_stroke = 4.5;
+        var max_base_node_size = 36;
+        var min_zoom = 0.1;
+        var max_zoom = 7;
+        d3.select("#graph_div").selectAll("*").remove();
+        svg = d3.select("#graph_div").append("svg");
+        zoom = d3.behavior.zoom().scaleExtent([min_zoom, max_zoom])
+        var g = svg.append("g");
+        svg.style("cursor", "move");
+        graph = {
+          'links': [],
+          'nodes': server_graph.nodes
+        };
+        var nodes_map = {}
+        for (var i = 0; i < server_graph.nodes.length; i++) {
+          nodes_map[server_graph.nodes[i].name] = i
+        }
+        server_graph.edges.forEach(function(e) {
+          graph.links.push({
+            'source': nodes_map[e[0]],
+            'target': nodes_map[e[1]]
+          });
+        });
+        var linkedByIndex = {};
+        graph.links.forEach(function(d) {
+          linkedByIndex[d.source + "," + d.target] = true;
+        });
+
+        function isConnected(a, b) {
+          return linkedByIndex[a.index + "," + b.index] || linkedByIndex[b.index + "," + a.index] || a.index == b.index;
+        }
+
+        function hasConnections(a) {
+          for (var property in linkedByIndex) {
+            s = property.split(",");
+            if ((s[0] == a.index || s[1] == a.index) && linkedByIndex[property]) return true;
+          }
+          return false;
+        }
+
+        force
+          .nodes(graph.nodes)
+          .links(graph.links)
+          .start();
+
+        var link = g.selectAll(".link")
+          .data(graph.links)
+          .enter().append("line")
+          .attr("class", "link")
+          .style("stroke-width", nominal_stroke)
+          .style("stroke", function(d) {
+            if (isNumber(d.score) && d.score >= 0) return color(d);
+            else return default_link_color;
+          })
+
+        var node = g.selectAll(".node")
+          .data(graph.nodes)
+          .enter().append("g")
+          .attr("class", "node")
+          .call(force.drag)
+        node.on("dblclick.zoom", function(d) {
+          d3.event.stopPropagation();
+          var dcx = (window.innerWidth / 2 - d.x * zoom.scale());
+          var dcy = (window.innerHeight / 2 - d.y * zoom.scale());
+          zoom.translate([dcx, dcy]);
+          g.attr("transform", "translate(" + dcx + "," + dcy + ")scale(" + zoom.scale() + ")");
+        });
+
+        var tocolor = "fill";
+        var towhite = "stroke";
+        if (outline) {
+          tocolor = "stroke"
+          towhite = "fill"
+        }
+        var circle = node.append("path")
+          .attr("d", d3.svg.symbol()
+            .size(function(d) {
+              return Math.PI * Math.pow(size(d.size) || nominal_base_node_size, 2);
+            })
+            .type(function(d) {
+              return d.type;
+            }))
+          .style(tocolor, function(d) {
+            return color(d);
+          })
+          .attr("id", function (d) {
+            if (d.name == '2VRWCp6miGxJufUB7GeqA43xmoQjoW48pMRKGNMN_mc') {
+              console.log('hello');
+            }
+            return d.name;
+          })
+          //.attr("r", function(d) { return size(d.size)||nominal_base_node_size; })
+          .style("stroke-width", nominal_stroke)
+          .style(towhite, "white");
+        var text = node.append("text")
+          .attr("dy", ".35em")
+          .style("font-size", "6px");
+        text.text(function(d) { return d.text; })
+          .style("text-anchor", "middle");
+        
+          
+        node.on("click", clickHandler);
+        node.on("mouseover", function(d) {
+            set_highlight(d);
+          })
+          .on("mousedown", function(d) {
+            d3.event.stopPropagation();
+            focus_node = d;
+            set_focus(d)
+            if (highlight_node === null) set_highlight(d)
+
+          }).on("mouseout", function(d) {
+            exit_highlight();
+
+          });
+
+        d3.select(window).on("mouseup",
+          function() {
+            if (focus_node !== null) {
+              focus_node = null;
+              if (highlight_trans < 1) {
+
+                circle.style("opacity", 1);
+                link.style("opacity", 1);
+              }
+            }
+
+            if (highlight_node === null) exit_highlight();
+          });
+
+        function exit_highlight() {
+          highlight_node = null;
+          if (focus_node === null) {
+            svg.style("cursor", "move");
+            if (highlight_color != "white") {
+              circle.style(towhite, "white");
+              link.style("stroke", function(o) {
+                return (isNumber(o.score) && o.score >= 0) ? color(o.score) : default_link_color
+              });
+            }
+
+          }
+        }
+
+        function set_focus(d) {
+          if (highlight_trans < 1) {
+            circle.style("opacity", function(o) {
+              return isConnected(d, o) ? 1 : highlight_trans;
+            });
+
+            link.style("opacity", function(o) {
+              return o.source.index == d.index || o.target.index == d.index ? 1 : highlight_trans;
+            });
+          }
+        }
+
+        function set_highlight(d) {
+          svg.style("cursor", "pointer");
+          if (focus_node !== null) d = focus_node;
+          highlight_node = d;
+
+          if (highlight_color != "white") {
+            circle.style(towhite, function(o) {
+              return isConnected(d, o) ? highlight_color : "white";
+            });
+            link.style("stroke", function(o) {
+              return o.source.index == d.index || o.target.index == d.index ? highlight_color : ((isNumber(o.score) && o.score >= 0) ? color(o.score) : default_link_color);
+            });
+          }
+        }
+        zoom.on("zoom", function() {
+          var stroke = nominal_stroke;
+          if (nominal_stroke * zoom.scale() > max_stroke) stroke = max_stroke / zoom.scale();
+          link.style("stroke-width", stroke);
+          circle.style("stroke-width", stroke);
+          var base_radius = nominal_base_node_size;
+          if (nominal_base_node_size * zoom.scale() > max_base_node_size) base_radius = max_base_node_size / zoom.scale();
+          circle.attr("d", d3.svg.symbol()
+            .size(function(d) {
+              return Math.PI * Math.pow(size(d.size) * base_radius / nominal_base_node_size || base_radius, 2);
+            })
+            .type(function(d) {
+              return d.type;
+            }))
+
+
+          g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        });
+
+        svg.call(zoom);
+
+        resize();
+        window.focus();
+        d3.select(window).on("resize", resize);
+
+        force.on("tick", function() {
+
+          node.attr("transform", function(d) {
+            return "translate(" + d.x + "," + d.y + ")";
+          });
+
+          link.attr("x1", function(d) {
+              return d.source.x;
+            })
+            .attr("y1", function(d) {
+              return d.source.y;
+            })
+            .attr("x2", function(d) {
+              return d.target.x;
+            })
+            .attr("y2", function(d) {
+              return d.target.y;
+            });
+
+          node.attr("cx", function(d) {
+              return d.x;
+            })
+            .attr("cy", function(d) {
+              return d.y;
+            });
+        });
+
+        function resize() {
+          var width = $("#graph_div").width(),
+            height = $("#graph_div").height();
+            // console.log($("#graph_div"));
+          svg.attr("width", width).attr("height", height);
+
+          force.size([force.size()[0] + (width - w) / zoom.scale(), force.size()[1] + (height - h) / zoom.scale()]).resume();
+        }
+
+        function isNumber(n) {
+          return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+      }
+    </script>
+    <style>
+      text {
+        font-family: sans-serif;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body style="margin: 0px;">
+    <div style="background-color: #eee; height: 48px; width: 100%; position: fixed;">
+      <div style="padding: 10px; float: left">
+        <div id="search">
+          BrightID:
+          <input id="brightid" style="width: 400px;"/>
+          Rank: <span id="rank"> </span>
+        </div>
+      </div>
+    </div>
+    <div id="graph_div" style="width: 100%; height: 100%;"></div>
+    <script type="text/javascript">
+
+
+function color(node) {
+  if (node.node_type == 'Seed') {
+    return 'blue';
+  } else if (parseInt(node.rank.split("-")[0])>=90) {
+    return 'green';
+  } else {
+    return 'yellow';
+  }
+};
+
+function load_graph() {
+  data = JSON.parse(graph_json);
+  data.nodes = data.nodes.map(node => {
+    node.text = node.rank;
+    return node;
+  });
+  draw_graph(data, color, focusNode);
+
+}
+
+function move(x, y, z) {
+  svg.transition().duration(1500)
+    .call(zoom.translate([((x*-1*z) + (window.innerWidth/2)), ((y*-1*z) + window.innerHeight/2)])
+    .scale(z).event);
+}
+
+function focusNode(node) {
+  move(node.x, node.y, 1);
+  console.log(node);
+  if (window.lastSelectedNode) {
+    d3.select('#'+lastSelectedNode.name).style('fill', lastSelectedNodeColor);
+  }
+  circle = d3.select('#'+node.name);
+  lastSelectedNode = node;
+  lastSelectedNodeColor = circle.style('fill');
+  circle.style("fill", "red");
+  $('#rank').html(node.rank);
+  $('#brightid').val(node.name);
+}
+
+$('#brightid').change(function() {
+  const id = $(this).val();
+  if (nodesMap[id]) {
+    focusNode(nodesMap[id]);
+  } else {
+    move(0, 0, .3);
+  }
+});
+
+$( document ).ready(function() {
+  load_graph();
+});
+
+
+    </script>
+
+  </body>
+
+
+</html>
