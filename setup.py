@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="http://github.com/BrightID/BrightID-Node",
     packages=setuptools.find_packages(),
-    install_requires=['networkx==2.1', 'flask', 'requests', 'matplotlib'],
+    install_requires=['networkx==2.1', 'flask', 'requests', 'matplotlib', 'xmltodict'],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
