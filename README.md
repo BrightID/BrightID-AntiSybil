@@ -23,26 +23,25 @@ The result will contain:
 
 - A CSV file that contains some data about the result of the attacks
 
-|Results                   |SybilRank                       |
-|                          |one attacker targeting top nodes|
-|--------------------------|--------------------------------|
-|No. Successful Honests    |423                             |
-|Successful Honests Percent|80.1136363636364                |
-|Sybils scored >= %        |0.176470588235294               |
-|Avg Honest - Avg Sybil    |13.174648989899                 |
-|Max Seed                  |86.44                           |
-|Avg Seed                  |46.3315151515152                |
-|Min Seed                  |15.57                           |
-|Max Honest                |84.16                           |
-|Avg Honest                |18.499898989899                 |
-|Min Honest                |0                               |
-|Max Attacker              |13.99                           |
-|Avg Attacker              |13.99                           |
-|Min Attacker              |13.99                           |
-|Max Sybil                 |8.7                             |
-|Avg Sybil                 |5.32525                         |
-|Min Sybil                 |3.99                            |
-|Border                    |8                               |
+|Results                   |SybilRank (one attacker targeting top nodes)|                     |
+|--------------------------|--------------------------------------------|
+|No. Successful Honests    |423                                         |
+|Successful Honests Percent|80.1136363636364                            |
+|Sybils scored >= %        |0.176470588235294                           |
+|Avg Honest - Avg Sybil    |13.174648989899                             |
+|Max Seed                  |86.44                                       |
+|Avg Seed                  |46.3315151515152                            |
+|Min Seed                  |15.57                                       |
+|Max Honest                |84.16                                       |
+|Avg Honest                |18.499898989899                             |
+|Min Honest                |0                                           |
+|Max Attacker              |13.99                                       |
+|Avg Attacker              |13.99                                       |
+|Min Attacker              |13.99                                       |
+|Max Sybil                 |8.7                                         |
+|Avg Sybil                 |5.32525                                     |
+|Min Sybil                 |3.99                                        |
+|Border                    |8                                           |
 
 [Sample](assets/result.csv)
 
