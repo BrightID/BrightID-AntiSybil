@@ -47,6 +47,7 @@ The result will contain:
 
 - A chart to evaluate the quality of different anti-sybil algorithms against the attacks and compare the algorithms together.
 ![](assets/1589538690.png)
+
 [Sample](assets/1589538690.png)
 
 
