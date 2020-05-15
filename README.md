@@ -23,7 +23,8 @@ The result will contain:
 
 - A CSV file that contains some data about the result of the attacks
 
-|Results                   |SybilRank (one attacker targeting top nodes)|                     |
+
+|Results                   |SybilRank (one attacker targeting top nodes)|
 |--------------------------|--------------------------------------------|
 |No. Successful Honests    |423                                         |
 |Successful Honests Percent|80.1136363636364                            |
@@ -43,13 +44,11 @@ The result will contain:
 |Min Sybil                 |3.99                                        |
 |Border                    |8                                           |
 
+
 [Sample](assets/result.csv)
 
 - A chart to evaluate the quality of different anti-sybil algorithms against the attacks and compare the algorithms together.
 ![](assets/1589538690.png)
-
-[Sample](assets/1589538690.png)
-
 
 #### Manual attack
 The manual attack is a way to design your attack simply and apply it on the BrightID's graph and check the algorithms results.
