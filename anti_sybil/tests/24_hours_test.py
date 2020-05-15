@@ -1,30 +1,11 @@
-from anti_sybil.utils import *
-from anti_sybil import algorithms
 import xmltodict
 import requests
 import os
+from anti_sybil import algorithms
+from anti_sybil.utils import *
 
 BACKUP_URL = 'http://storage.googleapis.com/brightid-backups/'
 OUTPUT_FOLDER = './outputs/24_hours_test/'
-
-
-def find_border(graph):
-    reset_ranks(graph)
-    ranker = algorithms.SybilGroupRank(graph)
-    ranker.rank()
-    attacker = max(graph.nodes, key=lambda node: node.rank)
-    attacker.groups.add('stupid_sybil')
-    sybil1 = graphs.node.Node('stupid_sybil_1', 'Sybil', set(['stupid_sybil']))
-    sybil2 = graphs.node.Node('stupid_sybil_2', 'Sybil', set(['stupid_sybil']))
-    graph.add_edge(attacker, sybil1)
-    graph.add_edge(attacker, sybil2)
-    reset_ranks(graph)
-    ranker = algorithms.SybilGroupRank(graph)
-    ranker.rank()
-    border = max(sybil1.raw_rank, sybil2.raw_rank)
-    graph.remove_nodes_from([sybil1, sybil2])
-    attacker.groups.remove('stupid_sybil')
-    return border
 
 
 def main():
@@ -42,7 +23,6 @@ def main():
         if not backup['Key'].startswith('brightid_'):
             continue
         urls.append([backup['Key'], backup['LastModified']])
-    print(urls)
     for i, l in enumerate(urls):
         rar_addr = '{0}temp/brightid{1}.tar.gz'.format(OUTPUT_FOLDER, i)
         zip_addr = '{0}temp/brightid{1}.zip'.format(OUTPUT_FOLDER, i)
@@ -56,7 +36,7 @@ def main():
         graph = from_json(json_graph)
         if not scores_dic:
             scores_dic = {k.name: [] for k in list(graph.nodes)}
-        border = find_border(graph)
+        border = stupid_sybil_border(graph)
         print('border', border)
         reset_ranks(graph)
         ranker = algorithms.SybilGroupRank(graph, {
