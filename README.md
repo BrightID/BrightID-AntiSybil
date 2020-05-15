@@ -18,6 +18,7 @@ Then you can run the attacks by
 The result will contain:
 - An HTML file for each attack that contains an interactive model of the attack's graph
 ![](assets/graph.gif)
+
 [Sample](assets/graph.html)
 
 - A CSV file that contains some data about the result of the attacks
@@ -42,6 +43,7 @@ The result will contain:
 |Avg Sybil                 |5.32525                         |
 |Min Sybil                 |3.99                            |
 |Border                    |8                               |
+
 [Sample](assets/result.csv)
 
 - A chart to evaluate the quality of different anti-sybil algorithms against the attacks and compare the algorithms together.
@@ -75,6 +77,7 @@ This is one simple manual attack
 
 This is the modeled attack and results
 ![](assets/manual_attack.png)
+
 [Sample](assets/manual_attack.html)
 
 ## Algorithms
