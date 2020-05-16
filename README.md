@@ -19,7 +19,8 @@ The result will contain:
 - An HTML file for each attack that contains an interactive model of the attack's graph
 ![](assets/graph.gif)
 
-[Sample](assets/graph.html)
+[Sample](https://explorer.brightid.org/graphs/n_groups_targeting_top_nodes.html)
+
 
 - A CSV file that contains some data about the result of the attacks
 
@@ -77,7 +78,7 @@ This is one simple manual attack
 This is the modeled attack and results
 ![](assets/manual_attack.png)
 
-[Sample](assets/manual_attack.html)
+[Sample](https://explorer.brightid.org/graphs/manual_attack.html)
 
 ## Algorithms
 
@@ -105,20 +106,32 @@ We assumed that an attacker will have one account with a normal or above-average
 #### [An attacker connects to the seeds](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/lone_attacks.py#L6)
 One attacker attempts to connect to some of the seed nodes and create some sybil nodes.
 
+[Sample](https://explorer.brightid.org/graphs/one_attacker_targeting_seeds.html)
+
 #### [An attacker connects to the top-ranked honests](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/lone_attacks.py#L39)
 One attacker attempts to connect to some of the top-ranked honests and create some sybil nodes.
+
+[Sample](https://explorer.brightid.org/graphs/one_attacker_targeting_top_nodes.html)
 
 #### [An attacker connects to the random honests](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/lone_attacks.py#L39)
 One attacker attempts to connect to some of the honests and create some sybil nodes.
 
+[Sample](https://explorer.brightid.org/graphs/one_attacker_targeting_random_nodes.html)
+
 #### [An attacker connects to one top-ranked honest node and propagates the score by creating multiple groups](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/lone_attacks.py#L76)
 One attacker attempts to connect to one of the top-ranked honests and create multiple (duplicate) groups of the sybils.
+
+[Sample](https://explorer.brightid.org/graphs/one_attacker_group_target_attack.html)
 
 #### [A seed as an attacker](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/lone_attacks.py#L116)
 A seed node attempts to create some sybils nodes.
 
+[Sample](https://explorer.brightid.org/graphs/one_seed_as_attacker.html)
+
 #### [A honest as an attacker](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/lone_attacks.py#L116)
 An honest node attempts to create some sybils nodes.
+
+[Sample](https://explorer.brightid.org/graphs/one_honest_as_attacker.html)
 
 ### Collaborative Attacks
 Multiple attackers attempting to propagate score to the Sybils to verify them by connecting to other nodes and creating groups.
@@ -129,20 +142,42 @@ All these attacks can be performed by one or more groups of attackers who collab
 #### [Attackers connect to the seeds](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/collaborative_attacks.py#L6)
 One or more groups of attackers attempt to connect to some of the seeds and create some sybil nodes.
 
+[One group sample](https://explorer.brightid.org/graphs/one_group_targeting_seeds.html)
+
+[Some groups sample](https://explorer.brightid.org/graphs/n_groups_targeting_seeds.html)
+
 #### [Attackers connect to the top-ranked honests](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/collaborative_attacks.py#L61)
 One or more groups of attackers attempt to connect to some of the top-ranked honests and create some sybil nodes.
+
+[One group sample](https://explorer.brightid.org/graphs/one_group_targeting_top_nodes.html)
+
+[Some groups sample](https://explorer.brightid.org/graphs/n_groups_targeting_top_nodes.html)
 
 #### [Attackers connect to the random honests](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/collaborative_attacks.py#L61)
 One or more groups of attackers attempt to connect to some honests and create some sybil nodes.
 
+[One group sample](https://explorer.brightid.org/graphs/one_group_targeting_random_nodes.html)
+
+[Some groups sample](https://explorer.brightid.org/graphs/n_groups_targeting_random_nodes.html)
+
 #### [Attackers connect to the top-ranked honests and propagate the score by creating multiple groups](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/collaborative_attacks.py#L121)
 A group of attackers attempts to connect to some of the top-ranked honests  and create multiple (duplicate) groups of the sybils.
+
+[One group sample](https://explorer.brightid.org/graphs/one_group_group_target_attack.html)
 
 #### [A group of seeds as attackers](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/collaborative_attacks.py#L176)
 One or more groups of seed nodes attempt to create some sybil nodes.
 
+[One group sample](https://explorer.brightid.org/graphs/one_group_of_seeds_as_attacker.html)
+
+[Some groups sample](https://explorer.brightid.org/graphs/n_groups_of_seeds_as_attacker.html)
+
 #### [A group of honests as attackers](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/collaborative_attacks.py#L176)
 One or more groups of honest nodes attempt to create some sybil nodes.
+
+[One group sample](https://explorer.brightid.org/graphs/one_group_of_honests_as_attacker.html)
+
+[Some groups sample](https://explorer.brightid.org/graphs/n_groups_of_honests_as_attacker.html)
 
 ## Anti-Sybil Algorithm Trials
 We tested four different algorithms with different parameters. This was made possible through funding from Aragon. The documentation and output of these trials are below.
