@@ -1,6 +1,6 @@
 
 # BrightID Anti Sybil
-This package provides a framework to generate different types of attacks and apply them on the BrightID's graph and to evaluate the quality of different anti sybil algorithms on them.
+This package provides a framework to generate different types of attacks and apply them on the BrightID's graph to evaluate the quality of different anti sybil algorithms on them.
 
 ## Prerequisite
 - Python3.7
