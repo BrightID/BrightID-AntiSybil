@@ -17,7 +17,7 @@ Then you can run the attacks by
 
 The result will contain:
 - An HTML file for each attack that contains an interactive model of the attack's graph
-![](https://explorer.brightid.org/assets/graph.gif)
+<img src="https://explorer.brightid.org/assets/graph.gif" width="800" />
 
 [Sample](https://explorer.brightid.org/graphs/n_groups_targeting_top_nodes.html)
 
