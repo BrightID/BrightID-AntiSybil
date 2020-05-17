@@ -17,7 +17,7 @@ Then you can run the attacks by
 
 The result will contain:
 - An HTML file for each attack that contains an interactive model of the attack's graph
-![](assets/graph.gif)
+![](https://explorer.brightid.org/assets/graph.gif)
 
 [Sample](https://explorer.brightid.org/graphs/n_groups_targeting_top_nodes.html)
 
@@ -46,10 +46,11 @@ The result will contain:
 |Border                    |8                                           |
 
 
-[Sample](assets/result.csv)
+[Sample](https://explorer.brightid.org/assets/result.csv)
+
 
 - A chart to evaluate the quality of different anti-sybil algorithms against the attacks and compare the algorithms together.
-![](assets/1589538690.png)
+![](https://explorer.brightid.org/assets/1589538690.png)
 
 #### Manual attack
 The manual attack is a way to design your attack simply and apply it on the BrightID's graph and check the algorithms results.
@@ -76,7 +77,7 @@ This is one simple manual attack
     }
 
 This is the modeled attack and results
-![](assets/manual_attack.png)
+![](https://explorer.brightid.org/assets/manual_attack.png)
 
 [Sample](https://explorer.brightid.org/graphs/manual_attack.html)
 
