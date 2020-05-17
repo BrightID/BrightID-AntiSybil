@@ -9,24 +9,24 @@ BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
 
 # Select Attacks
 ATTACKS = {
-    # 'one attacker targeting seeds': lone.targeting_seeds,
-    # 'one attacker targeting top nodes': lone.targeting_honest,
-    # 'one attacker targeting random nodes': lone.targeting_honest,
-    # 'one attacker group target attack': lone.group_attack,
-    # 'one seed as attacker': lone.collsion_attack,
-    # 'one honest as attacker': lone.collsion_attack,
-    # 'one group targeting seeds': collaborative.targeting_seeds,
-    # 'one group targeting top nodes': collaborative.targeting_honest,
-    # 'one group targeting random nodes': collaborative.targeting_honest,
-    # 'one group group target attack': collaborative.group_attack,
-    # 'one group of seeds as attacker': collaborative.collsion_attack,
-    # 'one group of honests as attacker': collaborative.collsion_attack,
-    # 'n groups targeting seeds': collaborative.targeting_seeds,
-    # 'n groups targeting top nodes': collaborative.targeting_honest,
-    # 'n groups targeting random nodes': collaborative.targeting_honest,
-    # 'n groups of seeds as attacker': collaborative.collsion_attack,
-    # 'n groups of honests as attacker': collaborative.collsion_attack,
-    'manual attack': manual.attack
+    'one attacker targeting seeds': lone.targeting_seeds,
+    'one attacker targeting top nodes': lone.targeting_honest,
+    'one attacker targeting random nodes': lone.targeting_honest,
+    'one attacker group target attack': lone.group_attack,
+    'one seed as attacker': lone.collsion_attack,
+    'one honest as attacker': lone.collsion_attack,
+    'one group targeting seeds': collaborative.targeting_seeds,
+    'one group targeting top nodes': collaborative.targeting_honest,
+    'one group targeting random nodes': collaborative.targeting_honest,
+    'one group group target attack': collaborative.group_attack,
+    'one group of seeds as attacker': collaborative.collsion_attack,
+    'one group of honests as attacker': collaborative.collsion_attack,
+    'n groups targeting seeds': collaborative.targeting_seeds,
+    'n groups targeting top nodes': collaborative.targeting_honest,
+    'n groups targeting random nodes': collaborative.targeting_honest,
+    'n groups of seeds as attacker': collaborative.collsion_attack,
+    'n groups of honests as attacker': collaborative.collsion_attack,
+    # 'manual attack': manual.attack
 }
 
 # Attacks options
@@ -93,8 +93,8 @@ ATTACKS_OPTIONS = {
 # Select Algorithms
 ALGORITHMS = {
     'SybilRank': algorithms.SybilRank,
-    # 'SybilGroupRank_V1': algorithms.V1SybilGroupRank,
-    'SybilGroupRank': algorithms.SybilGroupRank,
+    # 'GroupSybilRank_V1': algorithms.V1GroupSybilRank,
+    'GroupSybilRank': algorithms.GroupSybilRank,
     'WeightedSybilRank': algorithms.WeightedSybilRank,
     # 'IntraGroupWeight': algorithms.GroupSybilRank,
     # 'GroupMergingRank': algorithms.GroupMergingRank,
@@ -103,8 +103,8 @@ ALGORITHMS = {
 # Algorithms options
 ALGORITHMS_OPTIONS = {
     'SybilRank': {'accumulative': False, 'nonlinear_distribution': False},
-    'SybilGroupRank_V1': {'accumulative': False, 'nonlinear_distribution': False},
-    'SybilGroupRank': {'accumulative': False, 'nonlinear_distribution': False},
+    'GroupSybilRank_V1': {'accumulative': False, 'nonlinear_distribution': False},
+    'GroupSybilRank': {'accumulative': False, 'nonlinear_distribution': False},
     'WeightedSybilRank': {'accumulative': False, 'nonlinear_distribution': False},
     'IntraGroupWeight': {'group_edge_weight': 5},
     'GroupMergingRank': {'thresholds': [.36, .24, .18, .12, .06, .04, .02, .01, .005, .004, .003, .002, .0015, .001, .0005, 0]},

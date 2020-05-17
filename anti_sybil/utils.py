@@ -286,7 +286,7 @@ def load_brightid_graph(data):
 
 def stupid_sybil_border(graph):
     reset_ranks(graph)
-    ranker = algorithms.SybilGroupRank(graph)
+    ranker = algorithms.GroupSybilRank(graph)
     ranker.rank()
     attacker = max(graph.nodes, key=lambda node: node.rank)
     attacker.groups.add('stupid_sybil')
@@ -295,7 +295,7 @@ def stupid_sybil_border(graph):
     graph.add_edge(attacker, sybil1)
     graph.add_edge(attacker, sybil2)
     reset_ranks(graph)
-    ranker = algorithms.SybilGroupRank(graph)
+    ranker = algorithms.GroupSybilRank(graph)
     ranker.rank()
     border = max(sybil1.raw_rank, sybil2.raw_rank)
     graph.remove_nodes_from([sybil1, sybil2])

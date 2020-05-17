@@ -39,7 +39,7 @@ def main():
         border = stupid_sybil_border(graph)
         print('border', border)
         reset_ranks(graph)
-        ranker = algorithms.SybilGroupRank(graph, {
+        ranker = algorithms.GroupSybilRank(graph, {
             'stupid_sybil_border': border
         })
         ranker.rank()

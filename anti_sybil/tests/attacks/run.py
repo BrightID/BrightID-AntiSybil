@@ -85,7 +85,7 @@ def main():
 
     # making the graph and ranking nodes
     graph = generate_graph()
-    ranker = algorithms.SybilGroupRank(graph)
+    ranker = algorithms.GroupSybilRank(graph)
     ranker.rank()
 
     # modeling the attacks

@@ -4,7 +4,7 @@ import itertools
 from anti_sybil.utils import Node
 
 
-class SybilGroupRank(sybil_rank.SybilRank):
+class GroupSybilRank(sybil_rank.SybilRank):
 
     def __init__(self, graph, options=None):
         sybil_rank.SybilRank.__init__(self, graph, options)

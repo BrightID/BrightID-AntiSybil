@@ -14,29 +14,29 @@ graph = load_brightid_graph({
     'file_path': os.path.abspath(os.path.join(OUTPUT_FOLDER, 'temp'))
 })
 
-# SybilGroupRank V01 with the stupid sybil border option
+# GroupSybilRank V01 with the stupid sybil border option
 border = stupid_sybil_border(graph)
 reset_ranks(graph)
-ranker = algorithms.V1SybilGroupRank(graph, {
+ranker = algorithms.V1GroupSybilRank(graph, {
     'stupid_sybil_border': border
 })
 ranker.rank()
 graph1 = copy.deepcopy(ranker.graph)
 output1 = generate_output(
-    graph1, 'SybilGroupRank V01\n(stupid sybil border)')
+    graph1, 'GroupSybilRank V01\n(stupid sybil border)')
 draw_graph(ranker.graph, os.path.join(OUTPUT_FOLDER, 'graph_v01.html'))
 
 
-# SybilGroupRank with the stupid sybil border option
+# GroupSybilRank with the stupid sybil border option
 border = stupid_sybil_border(graph)
 reset_ranks(graph)
-ranker = algorithms.SybilGroupRank(graph, {
+ranker = algorithms.GroupSybilRank(graph, {
     'cleaning': True
 })
 ranker.rank()
 graph2 = copy.deepcopy(ranker.graph)
 output2 = generate_output(
-    graph2, 'SybilGroupRank\n(stupid sybil border)')
+    graph2, 'GroupSybilRank\n(stupid sybil border)')
 draw_graph(ranker.graph, os.path.join(OUTPUT_FOLDER, 'graph_v02.html'))
 
 # Generate result
