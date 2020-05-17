@@ -20,10 +20,5 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-    ],
-    entry_points={
-        'console_scripts': [
-            'anti_sybil_server = anti_sybil.simulation_platform.server:main'
-        ],
-    }
+    ]
 )
