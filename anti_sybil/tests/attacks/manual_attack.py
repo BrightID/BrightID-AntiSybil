@@ -1,5 +1,5 @@
 import random
-from anti_sybil.templates.node import Node
+from anti_sybil.utils import Node
 
 
 def attack(graph, options):

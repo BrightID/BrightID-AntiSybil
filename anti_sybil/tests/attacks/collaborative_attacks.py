@@ -1,4 +1,4 @@
-from anti_sybil.templates.node import Node
+from anti_sybil.utils import Node
 import random
 
 

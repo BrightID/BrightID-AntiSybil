@@ -7,10 +7,22 @@ import json
 import csv
 import os
 from . import algorithms
-from . import templates
 
 GRAPH_TEMPLATE = COMPARE_GRAPH_TEMPLATE = None
 BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
+
+
+class Node:
+    def __init__(self, name, node_type, groups=None, rank=None, raw_rank=None, degree=None):
+        self.name = name
+        self.node_type = node_type
+        self.rank = rank
+        self.groups = groups if groups else set()
+        self.raw_rank = raw_rank
+        self.degree = degree
+
+    def __repr__(self):
+        return str(self.name)
 
 
 def write_output_file(outputs, file_name):
@@ -157,7 +169,7 @@ def from_json(data):
     nodes = {}
     for node in data['nodes']:
         groups = set(node['groups']) if node['groups'] else None
-        nodes[node['name']] = templates.node.Node(
+        nodes[node['name']] = Node(
             node['name'], node['node_type'], groups, node['rank'])
         graph.add_node(nodes[node['name']])
     graph.add_edges_from([(nodes[edge[0]], nodes[edge[1]])
@@ -278,8 +290,8 @@ def stupid_sybil_border(graph):
     ranker.rank()
     attacker = max(graph.nodes, key=lambda node: node.rank)
     attacker.groups.add('stupid_sybil')
-    sybil1 = templates.node.Node('stupid_sybil_1', 'Sybil', set(['stupid_sybil']))
-    sybil2 = templates.node.Node('stupid_sybil_2', 'Sybil', set(['stupid_sybil']))
+    sybil1 = Node('stupid_sybil_1', 'Sybil', set(['stupid_sybil']))
+    sybil2 = Node('stupid_sybil_2', 'Sybil', set(['stupid_sybil']))
     graph.add_edge(attacker, sybil1)
     graph.add_edge(attacker, sybil2)
     reset_ranks(graph)

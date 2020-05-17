@@ -1,7 +1,7 @@
 from . import sybil_rank
 import networkx as nx
 import itertools
-from anti_sybil.templates.node import Node
+from anti_sybil.utils import Node
 
 
 class SybilGroupRank(sybil_rank.SybilRank):
