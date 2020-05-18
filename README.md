@@ -11,7 +11,7 @@ This package provides a framework to evaluate the quality of different anti-sybi
 
 - [SybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/py3/anti_sybil/algorithms/sybil_rank.py) is a well-known sybil detection algorithm that is based on the assumption that sybils have limited social connections to real users. It relies on the observation that an early-terminated random walk starting from a non-Sybil node in a social network has a higher degree-normalized (divided by the degree) landing probability to land at a non-sybil node than a sybil node.
 
-- [GroupSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/py3/anti_sybil/algorithms/sybil_group_rank.py) is an enhanced version of the SybilRank algorithm. In this algorithm, a graph is created in which the BrightID groups are nodes  and edges are weighted based on affinity between groups. Then original SybilRank algorithm will be applied to this graph of groups and users get scores from the best group they belong to. This algorithm achieved best results so far in identifying sybils based on modeled [attacks](#attacks) and is being used as official BrightID anti-sybil algorithm.
+- [GroupSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/py3/anti_sybil/algorithms/group_sybil_rank.py) is an enhanced version of the SybilRank algorithm. In this algorithm, a graph is created in which the BrightID groups are nodes  and edges are weighted based on affinity between groups. Then original SybilRank algorithm will be applied to this graph of groups and users get scores from the best group they belong to. This algorithm achieved best results so far in identifying sybils based on modeled [attacks](#attacks) and is being used as official BrightID anti-sybil algorithm.
 up edges.
 
 - [WeightedSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/py3/anti_sybil/algorithms/weighted_sybil_rank.py) is an enhanced version of the SybilRank algorithm that uses the number of common neighbors of the tow connected nodes as weight (trustworthy factor) of the edge.
@@ -88,29 +88,29 @@ You can configure the algorithms and attacks you want to test by editing the [co
 
 The result will contain:
 - An interactive graph ([example](https://explorer.brightid.org/graphs/n_groups_targeting_top_nodes.html)) per algorithm/attack that visualize the graph and scores each sybil/attacker/honest node achieved
-<img src="https://explorer.brightid.org/assets/graph.gif" width="800" />
+![](https://explorer.brightid.org/assets/graph.gif)
 
 - A CSV file ([example](https://explorer.brightid.org/assets/result.csv)) that has a column per algorithm/attack and provide following information for each algorithm/attack
 
-|Results                   |SybilRank (one attacker targeting top nodes)|
+|Results                   |GroupSybilRank one group group target attack|
 |--------------------------|--------------------------------------------|
-|No. Successful Honests    |423                                         |
-|Successful Honests Percent|80.1136363636364                            |
-|Sybils scored >= %        |0.176470588235294                           |
-|Avg Honest - Avg Sybil    |13.174648989899                             |
-|Max Seed                  |86.44                                       |
-|Avg Seed                  |46.3315151515152                            |
-|Min Seed                  |15.57                                       |
-|Max Honest                |84.16                                       |
-|Avg Honest                |18.499898989899                             |
+|No. Successful Honests    |416                                         |
+|Successful Honests Percent|78.1954887218045                            |
+|Sybils scored >= %        |0.080091533180778                           |
+|Avg Honest - Avg Sybil    |17.4819290581162                            |
+|Max Seed                  |100                                         |
+|Avg Seed                  |59.6248484848485                            |
+|Min Seed                  |31.88                                       |
+|Max Honest                |100                                         |
+|Avg Honest                |29.3145290581162                            |
 |Min Honest                |0                                           |
-|Max Attacker              |13.99                                       |
-|Avg Attacker              |13.99                                       |
-|Min Attacker              |13.99                                       |
-|Max Sybil                 |8.7                                         |
-|Avg Sybil                 |5.32525                                     |
-|Min Sybil                 |3.99                                        |
-|Border                    |8                                           |
+|Max Attacker              |13.96                                       |
+|Avg Attacker              |13.96                                       |
+|Min Attacker              |13.96                                       |
+|Max Sybil                 |13.96                                       |
+|Avg Sybil                 |11.8326                                     |
+|Min Sybil                 |5.87                                        |
+|Border                    |14                                          |
 
 
 - A chart to compare effectiveness of different anti-sybil algorithms to detect sybils in different attacks
