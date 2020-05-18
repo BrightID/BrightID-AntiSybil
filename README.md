@@ -120,4 +120,4 @@ The result will contain:
 
 
 ## Old Version
-The old version of BrightID Anti-Sybil algorithms, tests and documents can be found [here]().
+The old version of BrightID Anti-Sybil algorithms, tests and documents can be found [here](https://github.com/BrightID/BrightID-AntiSybil/tree/py2).
