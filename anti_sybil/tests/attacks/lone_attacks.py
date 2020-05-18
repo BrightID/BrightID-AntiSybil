@@ -113,7 +113,7 @@ def group_attack(graph, options):
 
 
 # one seed or honest node as an attacker
-def collsion_attack(graph, options):
+def collusion_attack(graph, options):
     edges = []
     sybils = []
     if options['attacker_type'] == 'Seed':

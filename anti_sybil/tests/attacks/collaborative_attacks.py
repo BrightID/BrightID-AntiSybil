@@ -154,7 +154,7 @@ def group_attack(graph, options):
 
 
 # a group of seeds or honests as attackers
-def collsion_attack(graph, options):
+def collusion_attack(graph, options):
     edges = []
     sybils = []
     if options['attacker_type'] == 'Seed':
