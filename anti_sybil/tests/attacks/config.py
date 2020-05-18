@@ -96,8 +96,6 @@ ALGORITHMS = {
     # 'GroupSybilRank_V1': algorithms.V1GroupSybilRank,
     'GroupSybilRank': algorithms.GroupSybilRank,
     'WeightedSybilRank': algorithms.WeightedSybilRank,
-    # 'IntraGroupWeight': algorithms.GroupSybilRank,
-    # 'GroupMergingRank': algorithms.GroupMergingRank,
 }
 
 # Algorithms options
@@ -106,6 +104,4 @@ ALGORITHMS_OPTIONS = {
     'GroupSybilRank_V1': {'accumulative': False, 'nonlinear_distribution': False},
     'GroupSybilRank': {'accumulative': False, 'nonlinear_distribution': False},
     'WeightedSybilRank': {'accumulative': False, 'nonlinear_distribution': False},
-    'IntraGroupWeight': {'group_edge_weight': 5},
-    'GroupMergingRank': {'thresholds': [.36, .24, .18, .12, .06, .04, .02, .01, .005, .004, .003, .002, .0015, .001, .0005, 0]},
 }
