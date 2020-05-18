@@ -220,7 +220,7 @@ def draw_graph(graph, file_name):
     if not GRAPH_TEMPLATE:
         abspath = os.path.abspath(__file__)
         dname = os.path.dirname(abspath)
-        with open(os.path.join(dname, './templates/graph.html')) as f:
+        with open(os.path.join(dname, 'templates/graph.html')) as f:
             GRAPH_TEMPLATE = f.read()
     dname = os.path.dirname(file_name)
     if dname and not os.path.exists(dname):
@@ -237,7 +237,7 @@ def draw_compare_graph(graph1, graph2, file_name):
     if not COMPARE_GRAPH_TEMPLATE:
         abspath = os.path.abspath(__file__)
         dname = os.path.dirname(abspath)
-        with open(os.path.join(dname, './templates/compare_graph.html')) as f:
+        with open(os.path.join(dname, 'templates/compare_graph.html')) as f:
             COMPARE_GRAPH_TEMPLATE = f.read()
     dname = os.path.dirname(file_name)
     if dname and not os.path.exists(dname):
