@@ -88,9 +88,11 @@ You can configure the algorithms and attacks you want to test by editing the [co
 
 The result will contain:
 - An interactive graph ([example](https://explorer.brightid.org/graphs/n_groups_targeting_top_nodes.html)) per algorithm/attack that visualize the graph and scores each sybil/attacker/honest node achieved
+
 ![](https://explorer.brightid.org/assets/graph.gif)
 
 - A CSV file ([example](https://explorer.brightid.org/assets/result.csv)) that has a column per algorithm/attack and provide following information for each algorithm/attack
+
 
 |Results                   |GroupSybilRank one group group target attack|
 |--------------------------|--------------------------------------------|
