@@ -9,12 +9,12 @@ This package provides a framework to evaluate the quality of different anti-sybi
 
 ## Algorithms
 
-- [SybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/py3/anti_sybil/algorithms/sybil_rank.py) is a well-known sybil detection algorithm that is based on the assumption that sybils have limited social connections to real users. It relies on the observation that an early-terminated random walk starting from a non-Sybil node in a social network has a higher degree-normalized (divided by the degree) landing probability to land at a non-sybil node than a sybil node.
+- [SybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/sybil_rank.py) is a well-known sybil detection algorithm that is based on the assumption that sybils have limited social connections to real users. It relies on the observation that an early-terminated random walk starting from a non-Sybil node in a social network has a higher degree-normalized (divided by the degree) landing probability to land at a non-sybil node than a sybil node.
 
-- [GroupSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/py3/anti_sybil/algorithms/group_sybil_rank.py) is an enhanced version of the SybilRank algorithm. In this algorithm, a graph is created in which the BrightID groups are nodes  and edges are weighted based on affinity between groups. Then original SybilRank algorithm will be applied to this graph of groups and users get scores from the best group they belong to. This algorithm achieved best results so far in identifying sybils based on modeled [attacks](#attacks) and is being used as official BrightID anti-sybil algorithm.
+- [GroupSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/group_sybil_rank.py) is an enhanced version of the SybilRank algorithm. In this algorithm, a graph is created in which the BrightID groups are nodes  and edges are weighted based on affinity between groups. Then original SybilRank algorithm will be applied to this graph of groups and users get scores from the best group they belong to. This algorithm achieved best results so far in identifying sybils based on modeled [attacks](#attacks) and is being used as official BrightID anti-sybil algorithm.
 up edges.
 
-- [WeightedSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/py3/anti_sybil/algorithms/weighted_sybil_rank.py) is an enhanced version of the SybilRank algorithm that uses the number of common neighbors of the tow connected nodes as weight (trustworthy factor) of the edge.
+- [WeightedSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/weighted_sybil_rank.py) is an enhanced version of the SybilRank algorithm that uses the number of common neighbors of the tow connected nodes as weight (trustworthy factor) of the edge.
 
 ## Attacks
 
@@ -54,7 +54,7 @@ All these attacks can be performed by one or more groups of attackers who collab
 - One or more groups of honest nodes attempt to create some sybil nodes. [implementation](https://github.com/BrightID/BrightID-AntiSybil/blob/1ab4a45c55646ab53e358cc667a2ca82b6055de4/anti_sybil/tests/attacks/collaborative_attacks.py#L176) - [graph for single group](https://explorer.brightid.org/graphs/one_group_of_honests_as_attacker.html) - [graph for multiple groups](https://explorer.brightid.org/graphs/n_groups_of_honests_as_attacker.html)
 
 ### Manual attack
-This is a way to manually add new nodes/edges/groups to the BrightID graph and see how different algorithms rank those nodes. You can use `MANUAL_ATTACK_OPTIONS` variable in the [config.py](https://github.com/BrightID/BrightID-AntiSybil/blob/py3/anti_sybil/tests/attacks/config.py) file to define the manual attack. This example adds 3 sybil nodes, connect them to `xGUyVQLYV80pajm8QP-9cfHC7xri49V58k02kqTAiUI` as attacker and add them to a new group. [graph for this manual attack](https://explorer.brightid.org/graphs/manual_attack.html)
+This is a way to manually add new nodes/edges/groups to the BrightID graph and see how different algorithms rank those nodes. You can use `MANUAL_ATTACK_OPTIONS` variable in the [config.py](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/tests/attacks/config.py) file to define the manual attack. This example adds 3 sybil nodes, connect them to `xGUyVQLYV80pajm8QP-9cfHC7xri49V58k02kqTAiUI` as attacker and add them to a new group. [graph for this manual attack](https://explorer.brightid.org/graphs/manual_attack.html)
 
     MANUAL_ATTACK_OPTIONS = {
         'top': True,
@@ -82,7 +82,7 @@ This is a way to manually add new nodes/edges/groups to the BrightID graph and s
 
 ## Running Tests
 
-You can configure the algorithms and attacks you want to test by editing the [config.py](https://github.com/BrightID/BrightID-AntiSybil/blob/py3/anti_sybil/tests/attacks/config.py) file in `anti_sybil/tests/attacks/config.py` and then run the tests by
+You can configure the algorithms and attacks you want to test by editing the [config.py](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/tests/attacks/config.py) file in `anti_sybil/tests/attacks/config.py` and then run the tests by
 
     $ python3 anti_sybil/tests/attacks/run.py
 
