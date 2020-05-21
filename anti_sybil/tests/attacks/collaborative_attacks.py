@@ -25,7 +25,8 @@ def targeting_seeds(graph, options):
                 (nodes_dic[attacker], nodes_dic[seed]))
 
     # making sybil nodes and connecting them to attacker nodes
-    num_groups = 1 if options['one_group'] else options['num_attacker']
+    num_groups = 1 if options['one_group'] else min(
+        options['num_attacker'], options['num_sybils'] // 2)
     for i in range(num_groups):
         for j in range(options['num_sybils'] // num_groups):
             groups = set(['collaborative_attack']) if options['one_group'] else set(
@@ -78,7 +79,8 @@ def targeting_honest(graph, options):
                 (nodes_dic[attacker], nodes_dic[honest.name]))
 
     # making sybil nodes and connecting them to attacker nodes
-    num_groups = 1 if options['one_group'] else options['num_attacker']
+    num_groups = 1 if options['one_group'] else min(
+        options['num_attacker'], options['num_sybils'] // 2)
     for i in range(num_groups):
         for j in range(options['num_sybils'] // num_groups):
             groups = set(['collaborative_attack']) if options['one_group'] else set(
@@ -166,7 +168,8 @@ def collusion_attack(graph, options):
     nodes_dic = {node.name: node for node in graph.nodes}
 
     # making sybil nodes and connecting them to attacker nodes
-    num_groups = 1 if options['one_group'] else options['num_attacker']
+    num_groups = 1 if options['one_group'] else min(
+        options['num_attacker'], options['num_sybils'] // 2)
     for i in range(num_groups):
         for j in range(options['num_sybils'] // num_groups):
             groups = set(['collaborative_attack']) if options['one_group'] else set(
