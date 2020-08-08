@@ -21,17 +21,16 @@ class GroupSybilRank(sybil_rank.SybilRank):
     def rank(self):
         ranker = sybil_rank.SybilRank(self.group_graph, self.options)
         ranker.rank()
-        groups_ranks = {g.name: (g.raw_rank, g.rank)
-                        for g in self.group_graph.nodes}
+        groups_ranks = {g.name: g.rank for g in self.group_graph.nodes}
 
         for node in self.graph.nodes:
             if len(node.groups) < self.min_group_req:
-                node.raw_rank = node.rank = 0
+                node.rank = 0
                 node.node_type = 'New'
             else:
                 max_group = max(
-                    node.groups, key=lambda g: groups_ranks.get(g, [-1])[0])
-                node.raw_rank, node.rank = groups_ranks.get(max_group, [0, 0])
+                    node.groups, key=lambda g: groups_ranks.get(g, 0))
+                node.rank = groups_ranks.get(max_group, 0)
         return self.group_graph
 
     @staticmethod
@@ -47,8 +46,15 @@ class GroupSybilRank(sybil_rank.SybilRank):
 
     def gen_group_graph(self):
         group_graph = nx.Graph()
-        groups_dic = dict([(group, Node(group, self.get_group_type(
-            self.groups[group]))) for group in self.groups])
+        seed_groups = set()
+        groups_dic = {}
+        for group in self.groups:
+            group_type = self.get_group_type(self.groups[group])
+            if group_type == 'Seed':
+                seed_groups.add(group)
+            groups_dic[group] = Node(group, group_type)
+        for group in seed_groups:
+            groups_dic[group].init_rank = 1 / len(seed_groups)
         pairs = itertools.combinations(self.groups.keys(), 2)
         pairs = sorted([(f, t) if f < t else (t, f)
                         for f, t in pairs], key=lambda pair: str(pair))
