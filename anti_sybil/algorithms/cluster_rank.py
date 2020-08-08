@@ -57,13 +57,6 @@ class ClusterRank():
             passeds = nodes[:index]
             print('border: {}, passeds: {}'.format(
                 score(nodes[index]), len(passeds)))
-            for node in graph:
-                if node in clusters:
-                    node.rank = '#{}-{}'.format(clusters[node], score(node))
-                else:
-                    node.rank = ''
-            draw_graph(
-                graph, './outputs/simple_attacks/{}.html'.format(step + 1))
 
             # remove the nodes that are not verified in this step
             for node in list(graph):
