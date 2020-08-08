@@ -9,11 +9,12 @@ def targeting_seeds(graph, options):
     attackers = []
     seeds = [n.name for n in graph.nodes if n.node_type == 'Seed']
     nodes_dic = {node.name: node for node in graph.nodes}
+    seeds.sort(key=lambda n: graph.degree(nodes_dic[n]))
 
     # making attacker nodes
     for i in range(options['num_attacker']):
-        groups = set(['collaborative_attack']) if options['one_group'] else set(
-            ['collaborative_attack_{}'.format(i)])
+        groups = {'collaborative_attack': 'NonSeed'} if options['one_group'] else {
+            'collaborative_attack_{}'.format(i): 'NonSeed'}
         nodes_dic['attacker_{}'.format(i)] = Node(
             'attacker_{}'.format(i), 'Attacker', groups=groups)
         attackers.append('attacker_{}'.format(i))
@@ -29,8 +30,8 @@ def targeting_seeds(graph, options):
         options['num_attacker'], options['num_sybils'] // 2)
     for i in range(num_groups):
         for j in range(options['num_sybils'] // num_groups):
-            groups = set(['collaborative_attack']) if options['one_group'] else set(
-                ['collaborative_attack_{}'.format(i)])
+            groups = {'collaborative_attack': 'NonSeed'} if options['one_group'] else {
+                'collaborative_attack_{}'.format(i): 'NonSeed'}
             nodes_dic['s-{0}-{1}'.format(i, j)] = Node(
                 's-{0}-{1}'.format(i, j), 'Sybil', groups=groups)
             sybils.append('s-{0}-{1}'.format(i, j))
@@ -44,8 +45,8 @@ def targeting_seeds(graph, options):
 
     # connecting sybil nodes together
     for i in range(options['stitches']):
-        edges.append((nodes_dic[random.choice(sybils)],
-                      nodes_dic[random.choice(sybils)]))
+        s, t = random.sample(sybils, 2)
+        edges.append((nodes_dic[s], nodes_dic[t]))
 
     # updating graph
     graph.add_edges_from(edges)
@@ -66,8 +67,8 @@ def targeting_honest(graph, options):
 
     # making attacker nodes
     for i in range(options['num_attacker']):
-        groups = set(['collaborative_attack']) if options['one_group'] else set(
-            ['collaborative_attack_{}'.format(i)])
+        groups = {'collaborative_attack': 'NonSeed'} if options['one_group'] else {
+            'collaborative_attack_{}'.format(i): 'NonSeed'}
         nodes_dic['attacker_{}'.format(i)] = Node(
             'attacker_{}'.format(i), 'Attacker', groups=groups)
         attackers.append('attacker_{}'.format(i))
@@ -83,8 +84,8 @@ def targeting_honest(graph, options):
         options['num_attacker'], options['num_sybils'] // 2)
     for i in range(num_groups):
         for j in range(options['num_sybils'] // num_groups):
-            groups = set(['collaborative_attack']) if options['one_group'] else set(
-                ['collaborative_attack_{}'.format(i)])
+            groups = {'collaborative_attack': 'NonSeed'} if options['one_group'] else {
+                'collaborative_attack_{}'.format(i): 'NonSeed'}
             nodes_dic['s-{0}-{1}'.format(i, j)] = Node(
                 's-{0}-{1}'.format(i, j), 'Sybil', groups=groups)
             sybils.append('s-{0}-{1}'.format(i, j))
@@ -98,8 +99,8 @@ def targeting_honest(graph, options):
 
     # connecting sybil nodes together
     for i in range(options['stitches']):
-        edges.append((nodes_dic[random.choice(sybils)],
-                      nodes_dic[random.choice(sybils)]))
+        s, t = random.sample(sybils, 2)
+        edges.append((nodes_dic[s], nodes_dic[t]))
 
     # updating graph
     graph.add_edges_from(edges)
@@ -118,7 +119,7 @@ def group_attack(graph, options):
     # making attacker nodes
     for i in range(options['num_attacker']):
         nodes_dic['attacker_{}'.format(i)] = Node('attacker_{}'.format(
-            i), 'Attacker', groups=set(['collaborative_attack']))
+            i), 'Attacker', groups={'collaborative_attack': 'NonSeed'})
         attackers.append('attacker_{}'.format(i))
 
     # connecting attacker nodes to the honest nodes
@@ -128,9 +129,9 @@ def group_attack(graph, options):
                 (nodes_dic[attacker], nodes_dic[honest.name]))
 
     # making sybil nodes and connecting them to the attacker nodes
-    for i in range(options['num_groups']):
+    for i in range(options['num_sybils']):
         nodes_dic['s-{0}'.format(i)] = Node(
-            's-{0}'.format(i), 'Sybil', groups=set(['collaborative_attack']))
+            's-{0}'.format(i), 'Sybil', groups={'collaborative_attack': 'NonSeed'})
         sybils.append('s-{0}'.format(i))
         for attacker in attackers:
             edges.append(
@@ -139,16 +140,17 @@ def group_attack(graph, options):
     # making sybil groups
     for i in range(options['num_groups']):
         for attacker in attackers:
-            nodes_dic[attacker].groups.add('collaborative_attack_{}'.format(i))
-        nodes_dic[random.choice(sybils)].groups.add(
-            'collaborative_attack_{}'.format(i))
-        nodes_dic[random.choice(sybils)].groups.add(
-            'collaborative_attack_{}'.format(i))
+            nodes_dic[attacker].groups['collaborative_attack_{}'.format(
+                i)] = 'NonSeed'
+        nodes_dic[random.choice(
+            sybils)].groups['collaborative_attack_{}'.format(i)] = 'NonSeed'
+        nodes_dic[random.choice(
+            sybils)].groups['collaborative_attack_{}'.format(i)] = 'NonSeed'
 
     # connecting sybil nodes together
     for i in range(options['stitches']):
-        edges.append((nodes_dic[random.choice(sybils)],
-                      nodes_dic[random.choice(sybils)]))
+        s, t = random.sample(sybils, 2)
+        edges.append((nodes_dic[s], nodes_dic[t]))
 
     # updating graph
     graph.add_edges_from(edges)
@@ -161,7 +163,9 @@ def collusion_attack(graph, options):
     sybils = []
     if options['attacker_type'] == 'Seed':
         attackers = sorted([n for n in graph.nodes if n.node_type == 'Seed'],
-                           key=lambda n: n.rank, reverse=True)[:options['num_attacker']]
+                           key=lambda n: graph.degree(n), reverse=True)
+        attackers = attackers[:options['num_attacker']]
+
     elif options['attacker_type'] == 'Honest':
         attackers = sorted([n for n in graph.nodes if n.node_type != 'Seed'],
                            key=lambda n: n.rank, reverse=True)[:options['num_attacker']]
@@ -172,8 +176,8 @@ def collusion_attack(graph, options):
         options['num_attacker'], options['num_sybils'] // 2)
     for i in range(num_groups):
         for j in range(options['num_sybils'] // num_groups):
-            groups = set(['collaborative_attack']) if options['one_group'] else set(
-                ['collaborative_attack_{}'.format(i)])
+            groups = {'collaborative_attack': 'NonSeed'} if options['one_group'] else {
+                'collaborative_attack_{}'.format(i): 'NonSeed'}
             nodes_dic['s-{0}-{1}'.format(i, j)] = Node(
                 's-{0}-{1}'.format(i, j), 'Sybil', groups=groups)
             sybils.append('s-{0}-{1}'.format(i, j))
@@ -187,8 +191,8 @@ def collusion_attack(graph, options):
 
     # connecting sybil nodes together
     for i in range(options['stitches']):
-        edges.append((nodes_dic[random.choice(sybils)],
-                      nodes_dic[random.choice(sybils)]))
+        s, t = random.sample(sybils, 2)
+        edges.append((nodes_dic[s], nodes_dic[t]))
 
     # updating graph
     graph.add_edges_from(edges)

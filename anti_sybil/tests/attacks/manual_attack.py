@@ -27,8 +27,7 @@ def attack(graph, options):
                 edge.append(nodes_dic[k])
             else:
                 if node_name not in nodes_dic:
-                    nodes_dic[node_name] = Node(
-                        node_name, 'Sybil', groups=set())
+                    nodes_dic[node_name] = Node(node_name, 'Sybil', groups={})
                 edge.append(nodes_dic[node_name])
         edges.append(edge)
 
@@ -37,14 +36,14 @@ def attack(graph, options):
         for node_name in options['groups'][group_name]:
             if node_name.startswith('seed_'):
                 k = seeds[int(node_name[5:])].name
-                nodes_dic[k].groups.add(group_name)
+                nodes_dic[k].groups[group_name] = 'NonSeed'
             elif node_name.startswith('honest_'):
                 k = honests[int(node_name[7:])].name
-                nodes_dic[k].groups.add(group_name)
+                nodes_dic[k].groups[group_name] = 'NonSeed'
             else:
                 if node_name not in nodes_dic:
                     raise Exception(
                         "Error, You should add nodes and connections first")
-                nodes_dic[node_name].groups.add(group_name)
+                nodes_dic[node_name].groups[group_name] = 'NonSeed'
     graph.add_edges_from(edges)
     return graph

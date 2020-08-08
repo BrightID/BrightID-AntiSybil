@@ -1,4 +1,5 @@
 import collaborative_attacks as collaborative
+import special_attacks as special
 import lone_attacks as lone
 import manual_attack as manual
 from anti_sybil import algorithms
@@ -26,24 +27,25 @@ ATTACKS = {
     'n groups targeting random nodes': collaborative.targeting_honest,
     'n groups of seeds as attacker': collaborative.collusion_attack,
     'n groups of honests as attacker': collaborative.collusion_attack,
+    'many small groups attack': special.many_small_groups_attack,
     # 'manual attack': manual.attack
 }
 
 # Attacks options
 # number of targets (top seed, top honest or random honest in the different algorithm)
-N_TARGETS = 20
+N_TARGETS = 10
 # number of sybils
-N_SYBILS = 40
+N_SYBILS = 50
 # number of attackers
-N_ATTACKERS = 20
+N_ATTACKERS = 5
 # number of connections between sybils
-N_STITCHES = 100
+N_STITCHES = 0
 # number of sybil groups in group target attacks
 N_GROUPS = 100
 # number of unfaithful seeds in seeds as attacker attacks
-N_UNFAITHFUL_SEEDS = 10
+N_UNFAITHFUL_SEEDS = 3
 # number of unfaithful honests in honests as attacker attacks
-N_UNFAITHFUL_HONESTS = 30
+N_UNFAITHFUL_HONESTS = 3
 
 # manual attack options
 # use `honest_ + integer` format to connect to the honests nodes
@@ -87,21 +89,24 @@ ATTACKS_OPTIONS = {
     'n groups targeting random nodes': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': False, 'top': False, 'stitches': N_STITCHES},
     'n groups of seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
     'n groups of honests as attacker': {'attacker_type': 'Honest', 'num_attacker': N_UNFAITHFUL_HONESTS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
+    'many small groups attack': {'num_sybils': N_SYBILS, 'stitches': N_STITCHES, 'num_attacker': N_UNFAITHFUL_SEEDS},
     'manual attack': MANUAL_ATTACK_OPTIONS
 }
 
 # Select Algorithms
 ALGORITHMS = {
+    'Yekta': algorithms.Yekta,
     'SybilRank': algorithms.SybilRank,
-    # 'GroupSybilRank_V1': algorithms.V1GroupSybilRank,
+    'GroupSybilRank_V1': algorithms.V1GroupSybilRank,
     'GroupSybilRank': algorithms.GroupSybilRank,
     'WeightedSybilRank': algorithms.WeightedSybilRank,
 }
 
 # Algorithms options
 ALGORITHMS_OPTIONS = {
-    'SybilRank': {'accumulative': False, 'nonlinear_distribution': False},
-    'GroupSybilRank_V1': {'accumulative': False, 'nonlinear_distribution': False},
-    'GroupSybilRank': {'accumulative': False, 'nonlinear_distribution': False},
-    'WeightedSybilRank': {'accumulative': False, 'nonlinear_distribution': False},
+    'Yekta': {'normalize': True},
+    'SybilRank': {'normalize': True},
+    'GroupSybilRank_V1': {'normalize': True},
+    'GroupSybilRank': {'normalize': True},
+    'WeightedSybilRank': {'normalize': True},
 }
