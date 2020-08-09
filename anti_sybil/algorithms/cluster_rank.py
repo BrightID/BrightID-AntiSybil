@@ -51,7 +51,7 @@ class ClusterRank():
                     m.clusters = {'graph': str(cluster)}
 
             # 1/2 nodes are passed based on the number of neighboring clusters and its degree
-            def score(n): return (m.score, graph.degree(n))
+            def score(n): return (n.score, graph.degree(n))
             nodes = sorted(graph, key=score, reverse=True)
             index = len(nodes) // 2
             passeds = nodes[:index]
