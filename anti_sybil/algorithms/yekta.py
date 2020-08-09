@@ -73,8 +73,7 @@ class Yekta():
 
     def rank(self):
         graph = self.graph.copy()
-        # sybil_rank_border = self.verification_border(graph)
-        sybil_rank_border = 0.0003
+        sybil_rank_border = self.verification_border(graph)
         self.normalize(graph)
         ranker = sybil_rank.SybilRank(graph, self.options)
         ranker.rank()
