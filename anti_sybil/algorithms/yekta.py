@@ -1,20 +1,13 @@
 import community
-import networkx as nx
-from . import sybil_rank
-from . import cluster_rank
 from anti_sybil.utils import *
-import random
 
-
-def distance(p1, p2):
-    return ((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2 + (p1[2] - p2[2])**2)**.5
-
+BORDERS = [3, 8, 7, 7, 7]
 
 class Yekta():
 
     def __init__(self, graph, options=None):
         self.graph = graph
-        self.options = options if options else {}
+        self.options = options
 
         # remove the unconnected nodes to the main component
         main_component = sorted([comp for comp in nx.connected_components(
@@ -23,91 +16,84 @@ class Yekta():
             if node not in main_component:
                 self.graph.remove_node(node)
 
-    def normalize(self, graph):
-        original_graph = graph.copy()
-        seeds = [n for n in original_graph if n.node_type == 'Seed']
-
-        # connect each node to 8 nearest neighbors that are in the same cluster
+    def check_seedness(self):
         clusters = community.best_partition(
-            graph, resolution=.3, randomize=False)
-        points = nx.spring_layout(graph, iterations=50, dim=3, random_state=3)
-        non_seeds = set(points) - set(seeds)
-        non_seeds = sorted(non_seeds, key=lambda n: original_graph.degree(n))
-        for node in non_seeds:
-            candidates = [
-                n for n in original_graph if clusters[n] == clusters[node]]
-            candidates = [n for n in candidates if n not in seeds]
-            candidates = [n for n in candidates if set(
-                original_graph.neighbors(n)) & set(original_graph.neighbors(node))]
-            candidates = sorted(candidates, key=lambda n: distance(
-                points[node], points[n]))[1:9]
-            for n in candidates:
-                graph.add_edge(node, n)
-
+            self.graph, resolution=2, randomize=False)
         cluster_members = {cluster: set() for cluster in clusters.values()}
         for node in clusters:
             cluster = clusters[node]
             cluster_members[cluster].add(node)
-
-        # each non-seed node can connect to at most 4 seeds
-        limit = 4
-        for node in original_graph:
-            if node.node_type == 'Seed':
-                continue
-            s_neighbors = set(original_graph.neighbors(node)) & set(seeds)
-            s_neighbors = sorted(
-                s_neighbors, key=lambda s: original_graph.degree(s), reverse=True)
-            for sn in s_neighbors[limit:]:
-                graph.remove_edge(node, sn)
-
-        # seeds can not have more than 4 connections in their own clusters and 2 in other clusters
-        for seed in seeds:
-            for cluster in cluster_members:
-                cluster_neighbors = (cluster_members[cluster] & set(
-                    graph.neighbors(seed))) - set(seeds)
-                cluster_neighbors = sorted(
-                    cluster_neighbors, key=lambda n: original_graph.degree(n), reverse=True)
-                limit = 4 if cluster == clusters[seed] else 2
-                for neighbor in cluster_neighbors[limit:]:
-                    graph.remove_edge(seed, neighbor)
+        for cluster in cluster_members:
+            members = cluster_members[cluster]
+            members = sorted(members, key=lambda m: m.created_at)
+            init_rank = sum([m.init_rank for m in members])
+            # this means for each seed group in a cluster 100 members can be passed
+            limit = init_rank / 0.01
+            for i in range(len(members)):
+                members[i].has_enough_seedness = (i < limit)
 
     def rank(self):
+        self.check_seedness()
         graph = self.graph.copy()
-        sybil_rank_border = self.verification_border(graph)
-        self.normalize(graph)
-        ranker = sybil_rank.SybilRank(graph, self.options)
-        ranker.rank()
 
-        # remove the nodes with scores lower than the border from initial main (not normalized) graph
-        graph = self.graph.copy()
-        for node in list(graph):
-            if node.rank < sybil_rank_border:
-                node.rank = 0
-                graph.remove_node(node)
+        for resolution in [.1, .2, .3, .5, .7, 1, 1.3, 1.6, 2]:
+            # clustering the nodes
+            clusters = community.best_partition(
+                graph, resolution=resolution, randomize=False)
+            cluster_members = {cluster: set() for cluster in clusters.values()}
+            for node in clusters:
+                cluster = clusters[node]
+                cluster_members[cluster].add(node)
 
-        print('border: {}, sybil rank passeds: {}'.format(round(sybil_rank_border, 4), len(graph)))
+            # find the edges both sides are inside the cluster for all clusters
+            inside_edges = {}
+            for cluster in cluster_members:
+                members = cluster_members[cluster]
+                inside_edges[cluster] = set()
+                for m in members:
+                    # ignore members without enough seedness
+                    if not m.has_enough_seedness:
+                        continue
+                    inside_neighbors = set(graph.neighbors(m)) & members
+                    for n in inside_neighbors:
+                        # ignore neighbors without enough seedness
+                        if not n.has_enough_seedness:
+                            continue
+                        # ignore duplicate edges
+                        if (n, m) in inside_neighbors:
+                            continue
+                        inside_edges[cluster].add((m, n))
 
-        ranker = cluster_rank.ClusterRank(graph, self.options)
-        ranker.rank()
+            # calculate the weighted average of the number of inside edges per cluster
+            num_inside_edges = sum([len(inside_edges[cluster])
+                                    for cluster in inside_edges])
+            order = len([n for n in graph if n.has_enough_seedness])
+            avg = num_inside_edges / order
 
+            # decrease the weight for inside edges for the clusters
+            # that their number of inside edges are more than average
+            for cluster in cluster_members:
+                edge_per_node = len(
+                    inside_edges[cluster]) / len(cluster_members[cluster])
+                if edge_per_node > avg:
+                    weight = avg / edge_per_node
+                    for f, t in inside_edges[cluster]:
+                        old_weight = graph[f][t].get('weight', 1)
+                        graph[f][t]['weight'] = min(weight, old_weight)
+
+        for n in graph:
+            n.rank = 0 if n.has_enough_seedness else -1
+        for i, border in enumerate(BORDERS):
+            for node in graph:
+                num = sum([graph[node][neighbor].get('weight', 1)
+                           for neighbor in graph.neighbors(node) if neighbor.rank >= i])
+                if num >= border:
+                    node.rank += 1
+        for node in graph:
+            node.rank = max(0, node.rank)
+        for i in range(6):
+            if i > 0:
+                border = BORDERS[i - 1]
+            print('Rank: {}\tBorder: {}\tNo.:{}'.format(
+                i, border, len([n for n in graph if n.rank == i])))
         return self.graph
-
-    def verification_border(self, graph):
-        seeds = [n for n in graph if n.node_type == 'Seed']
-        sum_sybils = 0
-        num_sybils = 10
-        for i, seed in enumerate(seeds):
-            sybils = []
-            g = graph.copy()
-            reset_ranks(g)
-            for j in range(num_sybils):
-                sybil = Node('border_node_{}_{}'.format(i, j), 'Sybil')
-                g.add_edge(seed, sybil)
-                sybils.append(sybil)
-            self.normalize(g)
-            ranker = algorithms.SybilRank(g, self.options)
-            ranker.rank()
-            # draw_graph(
-            #     g, './outputs/simple_attacks/{}.html'.format(i + 1))
-            sum_sybils += sum([s.rank for s in sybils])
-        return sum_sybils / (len(seeds) * num_sybils)
