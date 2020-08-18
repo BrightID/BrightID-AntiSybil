@@ -143,7 +143,7 @@ text {
         .attr("dy", ".35em")
         .style("font-size", nominal_text_size + "px")
         if (text_center)
-         text.text(function(d) { return parseInt(d.rank); })
+         text.text(function(d) { return d.rank; })
         .style("text-anchor", "middle");
         else
         text.attr("dx", function(d) {return (size(d.size)||nominal_base_node_size);})
@@ -152,7 +152,7 @@ text {
             var s = '';
             titles = ["name", "rank", "node_type", "groups"]
             for (var k in titles) {
-                s = s + titles[k] + ': ' + d[titles[k]] + '<br/>';        }
+                s = s + titles[k] + ': ' + JSON. stringify(d[titles[k]]) + '<br/>';        }
             document.getElementById('info').innerHTML = s;
         })
         node.on("mouseover", function(d) {

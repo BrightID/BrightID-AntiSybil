@@ -28,6 +28,7 @@ ATTACKS = {
     'n groups of seeds as attacker': collaborative.collusion_attack,
     'n groups of honests as attacker': collaborative.collusion_attack,
     'many small groups attack': special.many_small_groups_attack,
+    'multi cluster attack': collaborative.multi_cluster_attack,
     # 'manual attack': manual.attack
 }
 
@@ -90,12 +91,15 @@ ATTACKS_OPTIONS = {
     'n groups of seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
     'n groups of honests as attacker': {'attacker_type': 'Honest', 'num_attacker': N_UNFAITHFUL_HONESTS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
     'many small groups attack': {'num_sybils': N_SYBILS, 'stitches': N_STITCHES, 'num_attacker': N_UNFAITHFUL_SEEDS},
+    'multi cluster attack': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
     'manual attack': MANUAL_ATTACK_OPTIONS
 }
 
 # Select Algorithms
 ALGORITHMS = {
     'Yekta': algorithms.Yekta,
+    'cluster rank': algorithms.ClusterRank,
+    'seedness score': algorithms.SeednessScore,
     'SybilRank': algorithms.SybilRank,
     'GroupSybilRank_V1': algorithms.V1GroupSybilRank,
     'GroupSybilRank': algorithms.GroupSybilRank,
@@ -106,6 +110,7 @@ ALGORITHMS = {
 ALGORITHMS_OPTIONS = {
     'Yekta': {'normalize': True},
     'SybilRank': {'normalize': True},
+    'cluster rank': {},
     'GroupSybilRank_V1': {'normalize': True},
     'GroupSybilRank': {'normalize': True},
     'WeightedSybilRank': {'normalize': True},

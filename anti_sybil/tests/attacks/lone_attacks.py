@@ -1,143 +1,127 @@
 from anti_sybil.utils import Node
 import random
+import time
 
 
 # the attacker connects to the seeds
 def targeting_seeds(graph, options):
-    edges = []
     sybils = []
-    seeds = [n.name for n in graph.nodes if n.node_type == 'Seed']
-    nodes_dic = {node.name: node for node in graph.nodes}
+    seeds = [n for n in graph if n.node_type == 'Seed']
 
+    groups = {'target_attack': 'NonSeed'}
     # making the attacker node
-    nodes_dic['attacker'] = Node(
-        'attacker', 'Attacker', groups={'target_attack': 'NonSeed'})
+    attacker = Node('attacker', 'Attacker', groups=groups,
+                    created_at=int(time.time() * 1000))
 
     # connecting the attacker node to the seed nodes
     for i in range(options['num_seeds']):
-        edges.append(
-            (nodes_dic['attacker'], nodes_dic[seeds[i]]))
+        graph.add_edge(attacker, seeds[i])
 
     # making the sybil nodes and connecting them to attacker nodes
     for i in range(options['num_sybils']):
-        nodes_dic['s-{0}'.format(i)] = Node(
-            's-{0}'.format(i), 'Sybil', groups={'target_attack': 'NonSeed'})
-        sybils.append('s-{0}'.format(i))
-        edges.append((nodes_dic['s-{0}'.format(i)], nodes_dic['attacker']))
+        sybil = Node('s-{0}'.format(i), 'Sybil', groups=groups,
+                     created_at=int(time.time() * 1000))
+        sybils.append(sybil)
+        graph.add_edge(sybil, attacker)
 
     # connecting the sybil nodes together
     for i in range(options['stitches']):
         s, t = random.sample(sybils, 2)
-        edges.append((nodes_dic[s], nodes_dic[t]))
+        graph.add_edge(s, t)
 
-    # updating graph
-    graph.add_edges_from(edges)
     return graph
 
 
 # the attacker connects to the honests
 def targeting_honest(graph, options):
-    edges = []
     sybils = []
-    honests = [n for n in graph.nodes if n.rank > 0]
+    honests = [n for n in graph if n.rank > 0]
     if options['top']:
-        honests = sorted(honests, key=lambda n: n.rank, reverse=True)
+        honests.sort(key=lambda n: n.rank, reverse=True)
     else:
         random.shuffle(honests)
-    nodes_dic = {node.name: node for node in graph.nodes}
 
+    groups = {'target_attack': 'NonSeed'}
     # making the attacker node
-    nodes_dic['attacker'] = Node(
-        'attacker', 'Attacker', groups={'target_attack': 'NonSeed'})
+    attacker = Node('attacker', 'Attacker', groups=groups,
+                    created_at=int(time.time() * 1000))
 
     # connecting the attacker node to the honest nodes
     for honest in honests[:options['num_honests']]:
-        edges.append(
-            (nodes_dic['attacker'], nodes_dic[honest.name]))
+        graph.add_edge(attacker, honest)
 
     # making the sybil nodes and connecting them to the attacker node
     for i in range(options['num_sybils']):
-        nodes_dic['s-{0}'.format(i)] = Node(
-            's-{0}'.format(i), 'Sybil', groups={'target_attack': 'NonSeed'})
-        sybils.append('s-{0}'.format(i))
-        edges.append((nodes_dic['s-{0}'.format(i)], nodes_dic['attacker']))
+        sybil = Node('s-{0}'.format(i), 'Sybil', groups=groups,
+                     created_at=int(time.time() * 1000))
+        sybils.append(sybil)
+        graph.add_edge(sybil, attacker)
 
     # connecting the sybil nodes together
     for i in range(options['stitches']):
         s, t = random.sample(sybils, 2)
-        edges.append((nodes_dic[s], nodes_dic[t]))
+        graph.add_edge(s, t)
 
-    # updating graph
-    graph.add_edges_from(edges)
     return graph
 
 
 # one attacker connects to one top-ranked honest node and propagates the score by creating multiple groups
 def group_attack(graph, options):
-    edges = []
     sybils = []
-    target = sorted([n for n in graph.nodes],
-                    key=lambda n: n.rank, reverse=True)[0]
-    nodes_dic = {node.name: node for node in graph.nodes}
+    target = sorted(graph, key=lambda n: n.rank, reverse=True)[0]
 
+    groups = {'target_attack': 'NonSeed'}
     # making the attacker node
-    nodes_dic['attacker'] = Node(
-        'attacker', 'Attacker', groups={'target_attack': 'NonSeed'})
+    attacker = Node('attacker', 'Attacker', groups=groups,
+                    created_at=int(time.time() * 1000))
 
     # connecting the attacker to a top-ranked node
-    edges.append((nodes_dic['attacker'], nodes_dic[target.name]))
+    graph.add_edge(attacker, target)
 
     # making the sybil nodes and connecting them to the attacker
     for i in range(options['num_sybils']):
-        nodes_dic['s-{0}'.format(i)] = Node(
-            's-{0}'.format(i), 'Sybil', groups={'target_attack': 'NonSeed'})
-        sybils.append('s-{0}'.format(i))
-        edges.append((nodes_dic['s-{0}'.format(i)], nodes_dic['attacker']))
+        sybil = Node('s-{0}'.format(i), 'Sybil', groups=groups,
+                     created_at=int(time.time() * 1000))
+        sybils.append(sybil)
+        graph.add_edge(sybil, attacker)
 
     # connecting the sybil nodes together
     for i in range(options['stitches']):
         s, t = random.sample(sybils, 2)
-        edges.append((nodes_dic[s], nodes_dic[t]))
+        graph.add_edge(s, t)
 
     # making sybils groups
     for i in range(options['num_groups']):
-        nodes_dic['attacker'].groups['target_attack_{}'.format(i)] = 'NonSeed'
-        nodes_dic[random.choice(
-            sybils)].groups['target_attack_{}'.format(i)] = 'NonSeed'
-        nodes_dic[random.choice(
-            sybils)].groups['target_attack_{}'.format(i)] = 'NonSeed'
+        attacker.groups['target_attack_{}'.format(i)] = 'NonSeed'
+        random.choice(sybils).groups['target_attack_{}'.format(i)] = 'NonSeed'
+        random.choice(sybils).groups['target_attack_{}'.format(i)] = 'NonSeed'
 
-    # updating graph
-    graph.add_edges_from(edges)
     return graph
 
 
 # one seed or honest node as an attacker
 def collusion_attack(graph, options):
-    edges = []
     sybils = []
     if options['attacker_type'] == 'Seed':
-        attackers = sorted([n for n in graph.nodes if n.node_type ==
-                            'Seed'], key=lambda n: n.rank, reverse=True)
+        attackers = [n for n in graph if n.node_type == 'Seed']
+        attackers.sort(key=lambda n: n.rank, reverse=True)
         attacker = attackers[0]
     elif options['attacker_type'] == 'Honest':
-        attacker = sorted([n for n in graph.nodes if n.node_type !=
-                           'Seed'], key=lambda n: n.rank, reverse=True)[0]
-
-    nodes_dic = {node.name: node for node in graph.nodes}
+        attackers = [n for n in graph if n.node_type != 'Seed']
+        attackers.sort(key=lambda n: n.rank, reverse=True)
+        attacker = attackers[0]
 
     # making the sybil nodes and connecting them to the attacker node
+    groups = {'seeds_as_attacker': 'NonSeed'}
     for i in range(options['num_sybils']):
-        nodes_dic['s-{0}'.format(i)] = Node(
-            's-{0}'.format(i), 'Sybil', groups={'seeds_as_attacker': 'NonSeed'})
-        sybils.append('s-{0}'.format(i))
-        edges.append((nodes_dic['s-{0}'.format(i)], nodes_dic[attacker.name]))
+        sybil = Node('s-{0}'.format(i), 'Sybil', groups=groups,
+                     created_at=int(time.time() * 1000))
+        sybils.append(sybil)
+        graph.add_edge(sybil, attacker)
 
     # connecting the sybil nodes together
     for i in range(options['stitches']):
         s, t = random.sample(sybils, 2)
-        edges.append((nodes_dic[s], nodes_dic[t]))
+        graph.add_edge(s, t)
 
-    # updating graph
-    graph.add_edges_from(edges)
     return graph

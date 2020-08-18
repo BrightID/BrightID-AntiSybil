@@ -2,54 +2,49 @@ import anti_sybil.algorithms as algorithms
 from anti_sybil.utils import Node
 from anti_sybil.utils import *
 import random
+import time
 
 
 # the stupid sybil attack
 def stupid_sybil(graph, options):
-    honests = [n for n in graph.nodes if n.rank > 0]
     sybils = []
-    attackers = sorted(honests, key=lambda n: n.rank, reverse=True)
-    nodes_dic = {node.name: node for node in graph.nodes}
+    attackers = [n for n in graph if n.rank > 0]
+    attackers.sort(key=lambda n: n.rank, reverse=True)
     for attacker in attackers:
         attacker.groups['stupid_sybil'] = 'NonSeed'
         for i in range(2):
-            nodes_dic['s_{}'.format(i)] = Node(
-                'stupid_sybil_{}'.format(i), 'Sybil', {'stupid_sybil': 'NonSeed'})
-            graph.add_edge(attacker, nodes_dic['s_{}'.format(i)])
-            sybils.append('s_{}'.format(i))
+            groups = {'stupid_sybil': 'NonSeed'}
+            sybil = Node('stupid_sybil_{}'.format(i), 'Sybil', groups=groups, created_at=int(time.time() * 1000))
+            sybils.append(sybil)
+            graph.add_edge(attacker, sybil)
         reset_ranks(graph)
         ranker = algorithms.GroupSybilRank(graph)
         ranker.rank()
-        border = max([nodes_dic[s].raw_rank for s in sybils])
+        border = max([s.rank for s in sybils])
         if border:
             break
-        graph.remove_nodes_from([nodes_dic[s] for s in sybils])
+        graph.remove_nodes_from(sybils)
         del attacker.groups['stupid_sybil']
     return graph
 
 
 def many_small_groups_attack(graph, options):
-    edges = []
     sybils = []
-    attackers = sorted([n for n in graph.nodes if n.node_type == 'Seed'], key=lambda n: n.rank, reverse=False)[
-        :options['num_attacker']]
-    nodes_dic = {node.name: node for node in graph.nodes}
+    attackers = [n for n in graph if n.node_type == 'Seed']
+    attackers.sort(key=lambda n: n.rank, reverse=False)
+    attackers = attackers[:options['num_attacker']]
 
     for i in range(options['num_sybils']):
         groups = {'sg-{}'.format(i): 'NonSeed'}
-        nodes_dic['s-{}'.format(i)] = Node(
-            's-{}'.format(i), 'Sybil', groups=groups)
-        sybils.append('s-{}'.format(i))
+        sybil = Node('s-{}'.format(i), 'Sybil', groups=groups, created_at=int(time.time() * 1000))
+        sybils.append(sybil)
         for attacker in attackers:
-            edges.append(
-                (nodes_dic['s-{}'.format(i)], nodes_dic[attacker.name]))
-            attacker.groups['sg-{}'.format(i)] = 'NonSeed'
+            graph.add_edge(sybil, attacker)
+            attacker.groups.update(groups)
 
-    # connecting sybil nodes together
+    # connecting the sybil nodes together
     for i in range(options['stitches']):
-        edges.append((nodes_dic[random.choice(sybils)],
-                      nodes_dic[random.choice(sybils)]))
+        s, t = random.sample(sybils, 2)
+        graph.add_edge(s, t)
 
-    # updating graph
-    graph.add_edges_from(edges)
     return graph

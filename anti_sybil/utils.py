@@ -14,12 +14,13 @@ BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
 
 
 class Node:
-    def __init__(self, name, node_type, groups=None, init_rank=0, rank=None):
+    def __init__(self, name, node_type, groups=None, init_rank=0, rank=None, created_at=None):
         self.name = name
         self.node_type = node_type
         self.rank = rank
         self.groups = groups if groups else {}
         self.init_rank = init_rank
+        self.created_at = created_at
 
     def __repr__(self):
         return 'Node: {}'.format(self.name)
@@ -173,8 +174,8 @@ def from_json(data):
     nodes = {}
     for node in data['nodes']:
         groups = node['groups'] if node['groups'] else None
-        nodes[node['name']] = Node(
-            node['name'], node['node_type'], groups, node['init_rank'], node['rank'])
+        nodes[node['name']] = Node(node['name'], node['node_type'],
+                                   groups, node['init_rank'], node['rank'], node['created_at'])
         graph.add_node(nodes[node['name']])
     graph.add_edges_from([(nodes[edge[0]], nodes[edge[1]])
                           for edge in data['edges']])
@@ -206,7 +207,7 @@ def from_dump(f):
     ret = {'nodes': [], 'edges': []}
     for u in users:
         users[u] = {'node_type': 'Honest', 'init_rank': 0, 'rank': 0, 'name': u,
-                    'groups': {}, 'createdAt': users[u]['createdAt']}
+                    'groups': {}, 'created_at': users[u]['createdAt']}
         ret['nodes'].append(users[u])
 
     user_groups = [(
@@ -230,7 +231,7 @@ def from_dump(f):
             [c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
     ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
     ret['nodes'] = sorted(
-        ret['nodes'], key=lambda i: i['createdAt'], reverse=True)
+        ret['nodes'], key=lambda i: i['created_at'], reverse=True)
     return json.dumps(ret)
 
 
@@ -357,8 +358,7 @@ def nonlinear_distribution(graph, ratio, df, dt):
     counts = {}
     for num in nums:
         counts[int(num)] = counts.get(int(num), 0) + 1
-    navg = sum(sorted(nums)[int(len(nums) / 10)
-               :int(-1 * len(nums) / 10)]) / (.8 * len(nums))
+    navg = sum(sorted(nums)[int(len(nums) / 10)                            :int(-1 * len(nums) / 10)]) / (.8 * len(nums))
     navg = int(navg)
     max_num = max(nums)
     # find distance from average which include half of numbers
