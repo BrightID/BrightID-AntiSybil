@@ -14,10 +14,9 @@ class SybilRank():
             nodes_rank = self.spread_nodes_rank(nodes_rank)
         for node in self.graph:
             node.rank = nodes_rank[node]
-            if self.options.get('normalize', False):
-                node_degree = self.graph.degree(node, weight='weight')
-                if node_degree > 0:
-                    node.rank /= node_degree
+            node_degree = self.graph.degree(node, weight='weight')
+            if node_degree > 0:
+                node.rank /= node_degree
         return self.graph
 
     def spread_nodes_rank(self, nodes_rank):
