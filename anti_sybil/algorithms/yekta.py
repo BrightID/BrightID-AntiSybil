@@ -16,9 +16,9 @@ class Yekta():
             if node not in main_component:
                 self.graph.remove_node(node)
 
-    def check_seedness(self):
+    def check_seedness(self, graph):
         clusters = community.best_partition(
-            self.graph, resolution=2, randomize=False)
+            graph, resolution=2, randomize=False)
         cluster_members = {cluster: set() for cluster in clusters.values()}
         for node in clusters:
             cluster = clusters[node]
@@ -28,13 +28,13 @@ class Yekta():
             members = sorted(members, key=lambda m: m.created_at)
             init_rank = sum([m.init_rank for m in members])
             # this means for each seed group in a cluster 100 members can be passed
-            limit = init_rank / 0.01
-            for i in range(len(members)):
-                members[i].has_enough_seedness = (i < limit)
+            limit = int(init_rank / 0.01)
+            for member in members[limit:]:
+                graph.remove_node(member)
 
     def rank(self):
-        self.check_seedness()
         graph = self.graph.copy()
+        self.check_seedness(graph)
 
         for resolution in [.1, .2, .3, .5, .7, 1, 1.3, 1.6, 2]:
             # clustering the nodes
@@ -47,28 +47,25 @@ class Yekta():
 
             # find the edges both sides are inside the cluster for all clusters
             inside_edges = {}
+            # print(f"resolution: {resolution}")
             for cluster in cluster_members:
                 members = cluster_members[cluster]
                 inside_edges[cluster] = set()
                 for m in members:
-                    # ignore members without enough seedness
-                    if not m.has_enough_seedness:
-                        continue
                     inside_neighbors = set(graph.neighbors(m)) & members
                     for n in inside_neighbors:
-                        # ignore neighbors without enough seedness
-                        if not n.has_enough_seedness:
-                            continue
                         # ignore duplicate edges
                         if (n, m) in inside_neighbors:
                             continue
                         inside_edges[cluster].add((m, n))
-
+                # num_sybils = len([m for m in members if m.node_type == 'Sybil'])
+                # if num_sybils > 0 or True:
+                #     print(cluster, len(inside_edges[cluster]) / len(members), len(members), len(inside_edges[cluster]), num_sybils)
             # calculate the weighted average of the number of inside edges per cluster
             num_inside_edges = sum([len(inside_edges[cluster])
                                     for cluster in inside_edges])
-            order = len([n for n in graph if n.has_enough_seedness])
-            avg = num_inside_edges / order
+            avg = num_inside_edges / graph.order()
+            # print(f'avg: {avg}')
 
             # decrease the weight for inside edges for the clusters
             # that their number of inside edges are more than average
@@ -90,8 +87,6 @@ class Yekta():
                     continue
                 num = 0
                 for neighbor in graph.neighbors(node):
-                    if not neighbor.has_enough_seedness:
-                        continue
                     w = graph[node][neighbor].get('weight', 1)
                     # weaken weight if the neighbor has low rank
                     # use max(1, ) because we may reach neighbor before node
