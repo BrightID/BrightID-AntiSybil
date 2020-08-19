@@ -73,7 +73,6 @@ def successful_honests(graph, description, algorithm):
     for node in graph:
         if node.node_type in ['Seed', 'Honest', 'New'] and node.rank == 0:
             zeros += 1
-
         if node.node_type in ['Sybil', 'Non Bridge Sybil', 'Bridge Sybil']:
             sybils.append(node.rank)
         elif node.node_type in ['Seed', 'Honest', 'New']:
@@ -83,10 +82,21 @@ def successful_honests(graph, description, algorithm):
     avg_sybils = sum(sybils) / len(sybils) if sybils else 0
     verified = len([h for h in honests if h > avg_sybils])
     percent = verified / (len(graph) - len(sybils) - len(attackers)) * 100
-    print('{}\nAlgorithm:\t{}'.format(description, algorithm))
+    print('\n{}\nAlgorithm:\t{}'.format(description, algorithm))
     print('No. Zeros:\t{}'.format(zeros))
-    print('No. honests:\t{}\nNo. sybils:\t{}\nNo. verified:\t{}\nPercent:\t{}\n\n'.format(
-        len(honests), len(sybils), verified, percent))
+    if algorithm == 'Yekta':
+        res = {n.rank: {'honests': 0, 'sybils': 0} for n in graph}
+        for node in graph:
+            if node.node_type == 'Sybil':
+                res[node.rank]['sybils'] += 1
+            else:
+                res[node.rank]['honests'] += 1
+        for rank in sorted(res):
+            print('Rank: {}\t No. honests: {}\t No. sybils: {}'.format(
+                rank, res[rank]['honests'], res[rank]['sybils']))
+    else:
+        print('No. honests:\t{}\nNo. sybils:\t{}\nNo. verified:\t{}\nPercent:\t{}\n'.format(
+            len(honests), len(sybils), verified, percent))
     return percent
 
 

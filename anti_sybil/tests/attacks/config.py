@@ -114,4 +114,5 @@ ALGORITHMS_OPTIONS = {
     'GroupSybilRank_V1': {'normalize': True},
     'GroupSybilRank': {'normalize': True},
     'WeightedSybilRank': {'normalize': True},
+    'seedness score': {}
 }

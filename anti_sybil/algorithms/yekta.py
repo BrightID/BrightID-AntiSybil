@@ -1,7 +1,7 @@
 import community
 from anti_sybil.utils import *
 
-BORDERS = [3, 8, 7, 7, 7]
+BORDERS = [3, 8, 13, 20, 30]
 
 class Yekta():
 
@@ -82,18 +82,21 @@ class Yekta():
                         graph[f][t]['weight'] = min(weight, old_weight)
 
         for n in graph:
-            n.rank = 0 if n.has_enough_seedness else -1
+            n.rank = 0
         for i, border in enumerate(BORDERS):
+            step = i + 1
             for node in graph:
-                num = sum([graph[node][neighbor].get('weight', 1)
-                           for neighbor in graph.neighbors(node) if neighbor.rank >= i])
+                if step - node.rank > 1:
+                    continue
+                num = 0
+                for neighbor in graph.neighbors(node):
+                    if not neighbor.has_enough_seedness:
+                        continue
+                    w = graph[node][neighbor].get('weight', 1)
+                    # weaken weight if the neighbor has low rank
+                    # use max(1, ) because we may reach neighbor before node
+                    # and it has current step as rank in this step
+                    num += w / max(1, (step - neighbor.rank))
                 if num >= border:
-                    node.rank += 1
-        for node in graph:
-            node.rank = max(0, node.rank)
-        for i in range(6):
-            if i > 0:
-                border = BORDERS[i - 1]
-            print('Rank: {}\tBorder: {}\tNo.:{}'.format(
-                i, border, len([n for n in graph if n.rank == i])))
+                    node.rank = step
         return self.graph
