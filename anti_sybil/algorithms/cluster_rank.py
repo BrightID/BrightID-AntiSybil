@@ -1,5 +1,4 @@
 import community
-from anti_sybil.utils import *
 
 
 class ClusterRank():
@@ -55,8 +54,6 @@ class ClusterRank():
             nodes = sorted(graph, key=score, reverse=True)
             index = len(nodes) // 2
             passeds = nodes[:index]
-            print('border: {}, passeds: {}'.format(
-                score(nodes[index]), len(passeds)))
 
             # remove the nodes that are not verified in this step
             for node in list(graph):
