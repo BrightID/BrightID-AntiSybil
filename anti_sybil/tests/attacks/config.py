@@ -17,15 +17,21 @@ ATTACKS = {
     'one seed as attacker': lone.collusion_attack,
     'one honest as attacker': lone.collusion_attack,
     'one group targeting seeds': collaborative.targeting_seeds,
+    'one group targeting high degree seeds': collaborative.targeting_seeds,
     'one group targeting top nodes': collaborative.targeting_honest,
     'one group targeting random nodes': collaborative.targeting_honest,
     'one group group target attack': collaborative.group_attack,
     'one group of seeds as attacker': collaborative.collusion_attack,
+    'one group of disconnected seeds as attacker': collaborative.collusion_attack,
+    'one group of high degree seeds as attacker': collaborative.collusion_attack,
     'one group of honests as attacker': collaborative.collusion_attack,
     'n groups targeting seeds': collaborative.targeting_seeds,
+    'n groups targeting high degree seeds': collaborative.targeting_seeds,
     'n groups targeting top nodes': collaborative.targeting_honest,
     'n groups targeting random nodes': collaborative.targeting_honest,
     'n groups of seeds as attacker': collaborative.collusion_attack,
+    'n groups of disconnected seeds as attacker': collaborative.collusion_attack,
+    'n groups of high degree seeds as attacker': collaborative.collusion_attack,
     'n groups of honests as attacker': collaborative.collusion_attack,
     'many small groups attack': special.many_small_groups_attack,
     'multi cluster attack': collaborative.multi_cluster_attack,
@@ -47,6 +53,8 @@ N_GROUPS = 100
 N_UNFAITHFUL_SEEDS = 3
 # number of unfaithful honests in honests as attacker attacks
 N_UNFAITHFUL_HONESTS = 3
+# connect each node to random 10 nodes in the graph
+DENSE_GRAPH = False
 
 # manual attack options
 # use `honest_ + integer` format to connect to the honests nodes
@@ -80,39 +88,49 @@ ATTACKS_OPTIONS = {
     'one seed as attacker': {'attacker_type': 'Seed', 'num_sybils': N_SYBILS, 'stitches': N_STITCHES},
     'one honest as attacker': {'attacker_type': 'Honest', 'num_sybils': N_SYBILS, 'stitches': N_STITCHES},
     'one group targeting seeds': {'num_attacker': N_ATTACKERS, 'num_seeds': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES},
+    'one group targeting high degree seeds': {'num_attacker': N_ATTACKERS, 'num_seeds': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES, 'high_degree_attacker': True},
     'one group targeting top nodes': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': True, 'top': True, 'stitches': N_STITCHES},
     'one group targeting random nodes': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': True, 'top': False, 'stitches': N_STITCHES},
     'one group group target attack': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'num_groups': N_GROUPS, 'stitches': N_STITCHES},
     'one group of seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES},
+    'one group of disconnected seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES, 'disconnect_attacker': True},
+    'one group of high degree seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES, 'high_degree_attacker': True},
     'one group of honests as attacker': {'attacker_type': 'Honest', 'num_attacker': N_UNFAITHFUL_HONESTS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES},
     'n groups targeting seeds': {'num_attacker': N_ATTACKERS, 'num_seeds': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
+    'n groups targeting high degree seeds': {'num_attacker': N_ATTACKERS, 'num_seeds': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES, 'high_degree_attacker': True},
     'n groups targeting top nodes': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': False, 'top': True, 'stitches': N_STITCHES},
     'n groups targeting random nodes': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': False, 'top': False, 'stitches': N_STITCHES},
     'n groups of seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
+    'n groups of disconnected seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES, 'disconnect_attacker': True},
+    'n groups of high degree seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES, 'high_degree_attacker': True},
     'n groups of honests as attacker': {'attacker_type': 'Honest', 'num_attacker': N_UNFAITHFUL_HONESTS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
     'many small groups attack': {'num_sybils': N_SYBILS, 'stitches': N_STITCHES, 'num_attacker': N_UNFAITHFUL_SEEDS},
     'multi cluster attack': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
-    'manual attack': MANUAL_ATTACK_OPTIONS
+    # 'manual attack': MANUAL_ATTACK_OPTIONS
 }
 
 # Select Algorithms
 ALGORITHMS = {
-    'Yekta': algorithms.Yekta,
-    'cluster rank': algorithms.ClusterRank,
-    'seedness score': algorithms.SeednessScore,
-    'SybilRank': algorithms.SybilRank,
-    'GroupSybilRank_V1': algorithms.V1GroupSybilRank,
-    'GroupSybilRank': algorithms.GroupSybilRank,
-    'WeightedSybilRank': algorithms.WeightedSybilRank,
+    # 'yekta': algorithms.Yekta,
+    'sybil rank': algorithms.SybilRank,
+    # 'landing probability': algorithms.LandingProbability,
+    # 'weighted sybil rank': algorithms.WeightedSybilRank,
+    # 'normalized sybil rank': algorithms.NormalizedSybilRank,
+    # 'cluster rank': algorithms.ClusterRank,
+    # 'seedness score': algorithms.SeednessScore,
+    # 'group sybil rank': algorithms.GroupSybilRank,
+    # 'group sybil rank v1': algorithms.V1GroupSybilRank,
 }
 
 # Algorithms options
 ALGORITHMS_OPTIONS = {
-    'Yekta': {'normalize': True},
-    'SybilRank': {'normalize': True},
+    'yekta': {},
+    'sybil rank': {},
+    'landing probability': {},
+    'weighted sybil rank': {},
+    'normalized sybil rank': {},
     'cluster rank': {},
-    'GroupSybilRank_V1': {'normalize': True},
-    'GroupSybilRank': {'normalize': True},
-    'WeightedSybilRank': {'normalize': True},
-    'seedness score': {}
+    'seedness score': {},
+    'group sybil rank': {},
+    'group sybil rank v1': {},
 }

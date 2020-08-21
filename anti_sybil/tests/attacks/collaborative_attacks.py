@@ -8,8 +8,9 @@ import time
 def targeting_seeds(graph, options):
     sybils = []
     attackers = []
+    high_degree_attacker = options.get('high_degree_attacker', False)
     seeds = [n for n in graph if n.node_type == 'Seed']
-    seeds.sort(key=lambda n: graph.degree(n))
+    seeds.sort(key=lambda n: graph.degree(n), reverse=high_degree_attacker)
 
     # making attacker nodes
     for i in range(options['num_attacker']):
@@ -140,15 +141,21 @@ def group_attack(graph, options):
 # a group of seeds or honests as attackers
 def collusion_attack(graph, options):
     sybils = []
+    high_degree_attacker = options.get('high_degree_attacker', False)
     if options['attacker_type'] == 'Seed':
         attackers = [n for n in graph if n.node_type == 'Seed']
-        attackers.sort(key=lambda n: graph.degree(n), reverse=False)
+        attackers.sort(key=lambda n: graph.degree(n), reverse=high_degree_attacker)
         attackers = attackers[:options['num_attacker']]
 
     elif options['attacker_type'] == 'Honest':
         attackers = [n for n in graph if n.node_type != 'Seed']
-        attackers.sort(key=lambda n: n.rank, reverse=True)
+        attackers.sort(key=lambda n: n.rank, reverse=high_degree_attacker)
         attackers = attackers[:options['num_attacker']]
+
+    if options.get('disconnect_attacker', False):
+        for attacker in attackers:
+            for n in list(graph.neighbors(attacker))[1:]:
+                graph.remove_edge(attacker, n)
 
     # making sybil nodes and connecting them to attacker nodes
     num_groups = 1 if options['one_group'] else min(
