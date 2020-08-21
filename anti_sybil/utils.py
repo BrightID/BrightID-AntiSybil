@@ -358,7 +358,9 @@ def nonlinear_distribution(graph, ratio, df, dt):
     counts = {}
     for num in nums:
         counts[int(num)] = counts.get(int(num), 0) + 1
-    navg = sum(sorted(nums)[int(len(nums) / 10)                            :int(-1 * len(nums) / 10)]) / (.8 * len(nums))
+    f = int(len(nums) / 10)
+    t = int(-1 * len(nums) / 10)
+    navg = sum(sorted(nums)[f:t]) / (.8 * len(nums))
     navg = int(navg)
     max_num = max(nums)
     # find distance from average which include half of numbers
@@ -390,7 +392,7 @@ def linear_distribution(graph):
     min_rank = min(ranks, key=lambda item: item[1])[1]
     for node in graph:
         new_rank = (node.rank - min_rank) * 100 / (max_rank - min_rank)
-        node.rank = round(new_rank, 2)
+        node.rank = int(new_rank)
     return graph
 
 
