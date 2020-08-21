@@ -46,7 +46,7 @@ def tests(graph, description, file_name, outputs, charts):
             graph, ALGORITHMS_OPTIONS[algorithm_name])
         ranker.rank()
 
-        if algorithm_name != 'Yekta':
+        if algorithm_name != 'yekta':
             linear_distribution(ranker.graph)
 
         for node in graph:
@@ -85,7 +85,7 @@ def successful_honests(graph, description, algorithm):
     percent = verified / (len(graph) - len(sybils) - len(attackers)) * 100
     print(f'\n{description}\nAlgorithm:\t{algorithm}')
     print(f'No. Zeros:\t{zeros}')
-    if algorithm == 'Yekta':
+    if algorithm == 'yekta':
         res = {n.rank: {'honests': 0, 'sybils': 0} for n in graph}
         for node in graph:
             if node.node_type == 'Sybil':
