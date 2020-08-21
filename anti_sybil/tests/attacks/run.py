@@ -1,13 +1,15 @@
+from matplotlib.ticker import ScalarFormatter
 import matplotlib.pyplot as plt
 import multiprocessing
-import requests
 import networkx as nx
+import requests
+import random
 import time
+import math
 import os
 from anti_sybil import algorithms
 from anti_sybil.utils import *
 from config import *
-import random
 
 random.seed(2)
 x_axis = []
@@ -44,24 +46,23 @@ def tests(graph, description, file_name, outputs, charts):
             graph, ALGORITHMS_OPTIONS[algorithm_name])
         ranker.rank()
 
+        if algorithm_name != 'Yekta':
+            linear_distribution(ranker.graph)
+
         for node in graph:
             attacks['nodes'][nodes[node.name]
                              ]['scores'][algorithm_name] = node.rank
             if hasattr(node, 'clusters'):
                 attacks['nodes'][nodes[node.name]
                                  ]['clusters'].update(node.clusters)
-        if algorithm_name in ['SybilRank']:
-            linear_distribution(graph)
-        output = generate_output(
-            graph, '{}\n{}'.format(algorithm_name, description))
+        output = generate_output(graph, f'{algorithm_name}\n{description}')
         outputs.append(output)
-        graph_file_path = os.path.join(
-            OUTPUT_FOLDER, '2D_{}_{}.html'.format(algorithm_name, file_name))
+        graph_file_path = os.path.join(OUTPUT_FOLDER, f'2D_{algorithm_name}_{file_name}.html')
         draw_graph(graph, graph_file_path)
         charts[algorithm_name][description] = successful_honests(
             graph, description, algorithm_name)
     graph_file_path = os.path.join(
-        OUTPUT_FOLDER, '3D_{}.html'.format(file_name))
+        OUTPUT_FOLDER, f'3D_{file_name}.html')
     draw_3d_graph(attacks, list(ALGORITHMS.keys()), graph_file_path)
 
 
@@ -82,8 +83,8 @@ def successful_honests(graph, description, algorithm):
     avg_sybils = sum(sybils) / len(sybils) if sybils else 0
     verified = len([h for h in honests if h > avg_sybils])
     percent = verified / (len(graph) - len(sybils) - len(attackers)) * 100
-    print('\n{}\nAlgorithm:\t{}'.format(description, algorithm))
-    print('No. Zeros:\t{}'.format(zeros))
+    print(f'\n{description}\nAlgorithm:\t{algorithm}')
+    print(f'No. Zeros:\t{zeros}')
     if algorithm == 'Yekta':
         res = {n.rank: {'honests': 0, 'sybils': 0} for n in graph}
         for node in graph:
@@ -92,16 +93,17 @@ def successful_honests(graph, description, algorithm):
             else:
                 res[node.rank]['honests'] += 1
         for rank in sorted(res):
-            print('Rank: {}\t No. honests: {}\t No. sybils: {}'.format(
-                rank, res[rank]['honests'], res[rank]['sybils']))
-    else:
-        print('No. honests:\t{}\nNo. sybils:\t{}\nNo. verified:\t{}\nPercent:\t{}\n'.format(
-            len(honests), len(sybils), verified, percent))
+            print(f"Rank: {rank}\t No. honests: {res[rank]['honests']}\t No. sybils: {res[rank]['sybils']}")
+    print(f'No. honests:\t{len(honests)}\nNo. sybils:\t{len(sybils)}\nNo. verified:\t{verified}\nPercent:\t{percent}\n')
+    if DENSE_GRAPH and percent < 1:
+        percent = 1
     return percent
 
 
 def plot():
     fig, ax = plt.subplots()
+    fig.set_figheight(8)
+    fig.set_figwidth(10)
     colors = ['b', 'r', 'c', 'y', 'm', 'y', 'k', 'g']
     for i, chart in enumerate(charts):
         ax.plot(
@@ -110,14 +112,19 @@ def plot():
             'go--',
             color=colors[i],
             alpha=0.5,
-            label='= {}'.format(chart),
+            label=f'= {chart}',
         )
     ax.legend()
-    plt.title('Targets:{} Sybils:{} Attackers:{} Stitches:{} Groups:{} Unfaithful Seeds:{} Unfaithful Honests:{}'.format(
-        N_TARGETS, N_SYBILS, N_ATTACKERS, N_STITCHES, N_GROUPS, N_UNFAITHFUL_SEEDS, N_UNFAITHFUL_HONESTS), fontsize=7)
+    plt.title(f'Dense Graph:{DENSE_GRAPH} Targets:{N_TARGETS} Sybils:{N_SYBILS} Attackers:{N_ATTACKERS} Stitches:{N_STITCHES} Groups:{N_GROUPS} Unfaithful Seeds:{N_UNFAITHFUL_SEEDS} Unfaithful Honests:{N_UNFAITHFUL_HONESTS}', fontsize=10)
     plt.xticks(rotation=90)
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_FOLDER, str(int(time.time())) + '.png'))
+    plt.yticks([0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+    if not DENSE_GRAPH:
+        ax.set_yscale('log', basey=2)
+        ax.set_ylim(ymin=1, ymax=128, auto=False)
+        ax.yaxis.set_major_formatter(ScalarFormatter())
+        plt.yticks([1, 2, 4, 8, 16, 32, 64, 100])
+    plt.savefig(os.path.join(OUTPUT_FOLDER, str(int(time.time())) + '.png'), dpi=300)
 
 
 def main():
@@ -135,6 +142,13 @@ def main():
     for node in list(graph):
         if node not in main_component:
             graph.remove_node(node)
+
+    if DENSE_GRAPH:
+        for node in graph:
+            neighbors = random.sample(graph.nodes, 10)
+            for neighbor in neighbors:
+                if node != neighbor:
+                    graph.add_edge(node, neighbor)
 
     # rank the graph
     ranker = algorithms.SybilRank(graph)
