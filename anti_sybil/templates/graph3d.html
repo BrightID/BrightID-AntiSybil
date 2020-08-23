@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style> body { margin: 0; } </style>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://unpkg.com/3d-force-graph"></script>
+</head>
+
+<body>
+  <script type="text/javascript">
+  var data = JSON_GRAPH;
+  var algorithms = ALGORITHMS;
+
+  function count_border() {
+        sum_sybils = 0
+    sum_honests = 0
+    num_sybils = 0
+    num_honests = 0
+    data['nodes'].map(n => {
+      if (n.type == 'Sybil') {
+        sum_sybils += n.scores[localStorage.algorithm];
+        ++num_sybils;
+      }
+    })
+    const avg_sybils = sum_sybils / num_sybils
+    data['nodes'].map(n => {
+      if (n.scores[localStorage.algorithm] > avg_sybils) {
+        sum_honests += n.scores[localStorage.algorithm];
+        ++num_honests;
+      }
+    })
+    console.log(avg_sybils, sum_honests / num_honests, avg_sybils + 0.2 * (sum_honests / num_honests - avg_sybils))
+    return avg_sybils + 0.2 * (sum_honests / num_honests - avg_sybils);
+  }
+
+  function reset_color() {
+    const s = $('#colorBy').val();
+    const f = {
+      region: colorByRegion,
+      score: colorByScore,
+      type: colorByType,
+    } [s];
+    Graph.nodeColor(f);
+    localStorage.colorBy = s;
+  }
+
+  function colorByScore(n) {
+    if (n.scores[localStorage.algorithm] >= localStorage.border) return 'blue';
+    else return 'yellow';
+  }
+
+  function colorByType(n) {
+    if (n.type == 'Sybil') return 'yellow';
+    if (n.type == 'Seed') return 'green';
+    if (n.type == 'Attacker') return 'orange';
+    if (n.score >= localStorage.border) return 'blue';
+    return 'purple';
+  }
+  const switcher = parseInt(Math.random()*20);
+  function colorByRegion(n) {
+    const colors = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080'];
+    const i = regions.indexOf(n.region) + switcher;
+    return colors[i % colors.length];
+  }
+
+  function render() {
+    const algorithm = localStorage.algorithm;
+    const region = localStorage.region;
+    regions = Array.from(new Set(
+      data['nodes'].map(n => {
+        switch (region) {
+          case 'spatial':
+            n.region = n.clusters['spatial'];
+            break;
+          case 'graph':
+            n.region = n.clusters['graph'];
+            break;
+        }
+        return n.region;
+      })
+    ));
+    console.log('regions', regions);
+    Graph = ForceGraph3D()
+      (document.getElementById('3d-graph'))
+      .graphData(data)
+      .nodeOpacity(1)
+      // .nodeVal(n => n.seed ? 4 : (n.score >= localStorage.border ? 2 : 0.3))
+      .nodeLabel(n => 'id: ' + n.id + '<br/> scores: <br/>' + Object.entries(n.scores).map(s => '&nbsp; &nbsp;' + s[0] + ': ' + s[1]).join('<br/>') + '<br/> regions: <br/>' +  Object.entries(n.clusters).map(s => '&nbsp; &nbsp;' + s[0] + ': ' + s[1]).join('<br/>'))
+    reset_color();
+  }
+
+  function update() {
+    localStorage.algorithm = $('#algorithm').val();
+    localStorage.region = $('#region').val();
+    localStorage.border = count_border();
+    location.reload();
+  }
+
+  $(document).ready(function() {
+    let $selectAlgorithm = $("select[name='algorithm']")
+    $(algorithms).each(function(i, v) {
+      $selectAlgorithm.append($("<option>", { value: v, html: v }));
+    });
+
+    if (localStorage.algorithm) {
+      $('#algorithm').val(localStorage.algorithm);
+      $('#region').val(localStorage.region);
+    } else {
+      localStorage.algorithm = $('#algorithm').val();
+      localStorage.region = $('#region').val();
+    }
+
+    localStorage.border = count_border();
+    console.log('border', localStorage.border);
+
+    if (localStorage.colorBy) {
+      $('#colorBy').val(localStorage.colorBy);
+    }
+    $('#algorithm').change(update);
+    $('#region').change(update);
+    $('#colorBy').change(reset_color);
+    render();
+  });
+  </script>
+    <div style="background-color: #eee; height: 48px; width: 100%; position: fixed; z-index: 3;">
+      <div id="searchbox" style=" margin: 15px;">
+        Algorithms:
+        <select name="algorithm" id="algorithm">
+        </select>
+        Regions:
+        <select name="region" id="region">
+          <option value="spatial">Spatial</option>
+          <option value="graph">Graph</option>
+        </select>
+        Color By:
+        <select name="colorBy" id="colorBy">
+          <option value="type">Type</option>
+          <option value="region">Region</option>
+          <option value="score">Score</option>
+        </select>
+      </div>
+    </div>
+    <div id="3d-graph"></div>
+</body>
+
+</html>

@@ -1,4 +1,5 @@
 import collaborative_attacks as collaborative
+import special_attacks as special
 import lone_attacks as lone
 import manual_attack as manual
 from anti_sybil import algorithms
@@ -16,34 +17,46 @@ ATTACKS = {
     'one seed as attacker': lone.collusion_attack,
     'one honest as attacker': lone.collusion_attack,
     'one group targeting seeds': collaborative.targeting_seeds,
+    'one group targeting high degree seeds': collaborative.targeting_seeds,
     'one group targeting top nodes': collaborative.targeting_honest,
     'one group targeting random nodes': collaborative.targeting_honest,
     'one group group target attack': collaborative.group_attack,
     'one group of seeds as attacker': collaborative.collusion_attack,
+    'one group of disconnected seeds as attacker': collaborative.collusion_attack,
+    'one group of high degree seeds as attacker': collaborative.collusion_attack,
     'one group of honests as attacker': collaborative.collusion_attack,
     'n groups targeting seeds': collaborative.targeting_seeds,
+    'n groups targeting high degree seeds': collaborative.targeting_seeds,
     'n groups targeting top nodes': collaborative.targeting_honest,
     'n groups targeting random nodes': collaborative.targeting_honest,
     'n groups of seeds as attacker': collaborative.collusion_attack,
+    'n groups of disconnected seeds as attacker': collaborative.collusion_attack,
+    'n groups of high degree seeds as attacker': collaborative.collusion_attack,
     'n groups of honests as attacker': collaborative.collusion_attack,
+    'many small groups attack': special.many_small_groups_attack,
+    'multi cluster attack': collaborative.multi_cluster_attack,
     # 'manual attack': manual.attack
 }
 
 # Attacks options
 # number of targets (top seed, top honest or random honest in the different algorithm)
-N_TARGETS = 20
+N_TARGETS = 10
 # number of sybils
-N_SYBILS = 40
+N_SYBILS = 50
 # number of attackers
-N_ATTACKERS = 20
+N_ATTACKERS = 10
 # number of connections between sybils
-N_STITCHES = 100
+N_STITCHES = 500
 # number of sybil groups in group target attacks
-N_GROUPS = 100
+N_GROUPS = 500
 # number of unfaithful seeds in seeds as attacker attacks
-N_UNFAITHFUL_SEEDS = 10
+N_UNFAITHFUL_SEEDS = 5
 # number of unfaithful honests in honests as attacker attacks
-N_UNFAITHFUL_HONESTS = 30
+N_UNFAITHFUL_HONESTS = 5
+# connect each node to random 10 nodes in the graph
+DENSE_GRAPH = True
+# in the dense graph, add # NEW_EDGES to each node
+NEW_EDGES = 10
 
 # manual attack options
 # use `honest_ + integer` format to connect to the honests nodes
@@ -77,31 +90,49 @@ ATTACKS_OPTIONS = {
     'one seed as attacker': {'attacker_type': 'Seed', 'num_sybils': N_SYBILS, 'stitches': N_STITCHES},
     'one honest as attacker': {'attacker_type': 'Honest', 'num_sybils': N_SYBILS, 'stitches': N_STITCHES},
     'one group targeting seeds': {'num_attacker': N_ATTACKERS, 'num_seeds': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES},
+    'one group targeting high degree seeds': {'num_attacker': N_ATTACKERS, 'num_seeds': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES, 'high_degree_attacker': True},
     'one group targeting top nodes': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': True, 'top': True, 'stitches': N_STITCHES},
     'one group targeting random nodes': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': True, 'top': False, 'stitches': N_STITCHES},
     'one group group target attack': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'num_groups': N_GROUPS, 'stitches': N_STITCHES},
     'one group of seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES},
+    'one group of disconnected seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES, 'disconnect_attacker': True},
+    'one group of high degree seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES, 'high_degree_attacker': True},
     'one group of honests as attacker': {'attacker_type': 'Honest', 'num_attacker': N_UNFAITHFUL_HONESTS, 'num_sybils': N_SYBILS, 'one_group': True, 'stitches': N_STITCHES},
     'n groups targeting seeds': {'num_attacker': N_ATTACKERS, 'num_seeds': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
+    'n groups targeting high degree seeds': {'num_attacker': N_ATTACKERS, 'num_seeds': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES, 'high_degree_attacker': True},
     'n groups targeting top nodes': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': False, 'top': True, 'stitches': N_STITCHES},
     'n groups targeting random nodes': {'num_attacker': N_ATTACKERS, 'num_honests': N_TARGETS, 'num_sybils': N_SYBILS, 'one_group': False, 'top': False, 'stitches': N_STITCHES},
     'n groups of seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
+    'n groups of disconnected seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES, 'disconnect_attacker': True},
+    'n groups of high degree seeds as attacker': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES, 'high_degree_attacker': True},
     'n groups of honests as attacker': {'attacker_type': 'Honest', 'num_attacker': N_UNFAITHFUL_HONESTS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
+    'many small groups attack': {'num_sybils': N_SYBILS, 'stitches': N_STITCHES, 'num_attacker': N_UNFAITHFUL_SEEDS},
+    'multi cluster attack': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
     'manual attack': MANUAL_ATTACK_OPTIONS
 }
 
 # Select Algorithms
 ALGORITHMS = {
-    'SybilRank': algorithms.SybilRank,
-    # 'GroupSybilRank_V1': algorithms.V1GroupSybilRank,
-    'GroupSybilRank': algorithms.GroupSybilRank,
-    'WeightedSybilRank': algorithms.WeightedSybilRank,
+    'sybil rank': algorithms.SybilRank,
+    # 'group sybil rank v1': algorithms.V1GroupSybilRank,
+    # 'group sybil rank': algorithms.GroupSybilRank,
+    'weighted sybil rank': algorithms.WeightedSybilRank,
+    'landing probability': algorithms.LandingProbability,
+    'normalized sybil rank': algorithms.NormalizedSybilRank,
+    'cluster rank': algorithms.ClusterRank,
+    'seedness score': algorithms.SeednessScore,
+    'yekta': algorithms.Yekta,
 }
 
 # Algorithms options
 ALGORITHMS_OPTIONS = {
-    'SybilRank': {'accumulative': False, 'nonlinear_distribution': False},
-    'GroupSybilRank_V1': {'accumulative': False, 'nonlinear_distribution': False},
-    'GroupSybilRank': {'accumulative': False, 'nonlinear_distribution': False},
-    'WeightedSybilRank': {'accumulative': False, 'nonlinear_distribution': False},
+    'sybil rank': {},
+    'group sybil rank v1': {},
+    'group sybil rank': {},
+    'weighted sybil rank': {},
+    'landing probability': {},
+    'normalized sybil rank': {},
+    'cluster rank': {},
+    'seedness score': {},
+    'yekta': {},
 }
