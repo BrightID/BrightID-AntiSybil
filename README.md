@@ -2,7 +2,7 @@
 This package provides a framework to evaluate the quality of different anti-sybil [algorithms](#algorithms), by simulating different [attacks](#attacks) to [BrightID's social graph](https://explorer.brightid.org).
 
 
-![](https://explorer.brightid.org/assets/1589538690.png)
+![](https://explorer.brightid.org/charts/compare_graph.png)
 
 *Comparing performance of different algorithms in detecting sybils in different attacks*
 
@@ -11,10 +11,23 @@ This package provides a framework to evaluate the quality of different anti-sybi
 
 - [SybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/sybil_rank.py) is a well-known sybil detection algorithm that is based on the assumption that sybils have limited social connections to real users. It relies on the observation that an early-terminated random walk starting from a non-Sybil node in a social network has a higher degree-normalized (divided by the degree) landing probability to land at a non-sybil node than a sybil node.
 
-- [GroupSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/group_sybil_rank.py) is an enhanced version of the SybilRank algorithm. In this algorithm, a graph is created in which the BrightID groups are nodes  and edges are weighted based on affinity between groups. Then original SybilRank algorithm will be applied to this graph of groups and users get scores from the best group they belong to. This algorithm achieved best results so far in identifying sybils based on modeled [attacks](#attacks) and is being used as official BrightID anti-sybil algorithm.
-up edges.
+- [GroupSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/group_sybil_rank.py) is an enhanced version of the SybilRank algorithm. In this algorithm, a graph is created in which the BrightID groups are nodes  and edges are weighted based on affinity between groups. Then original SybilRank algorithm will be applied to this graph of groups and users get scores from the best group they belong to. 
 
 - [WeightedSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/weighted_sybil_rank.py) is an enhanced version of the SybilRank algorithm that uses the number of common neighbors of the tow connected nodes as weight (trustworthy factor) of the edge.
+
+- [LandingProbability](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/landing_probability.py) is the probability of landing of a random walk started from seed nodes on each node of the graph. The result is the same with SybilRank except nodes' ranks are not normalized by dividing them to nodes' degree.
+
+- [NormalizedSybilRank](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/normalized_sybil_rank.py) is calculating SybilRank on a normalized graph. To normalize the graph:
+  - Each node will be connected to 8 nearest neighbors that are in the same cluster
+  - Prevent non-seed nodes from having connections to more than 4 seeds
+  - Prevent seeds from having connections to more than 4 nodes in their own clusters and 2 in other clusters
+
+- [ClusterRank](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/cluster_rank.py) ranks nodes from 1-5 based on the number of clusters that they have neighbors in.
+
+- [SeednessScore](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/seedness_score.py) gives scores to nodes by clustering graph with different resolutions and dividing number of seeds to number of cluster members.
+
+- [Yekta](https://github.com/BrightID/BrightID-AntiSybil/blob/master/anti_sybil/algorithms/yekta.py) rank nodes from 1-5 based on nodes normalized degree. The algorithm decrease the weight for inside edges for the clusters that their number of inside edges are more than average, and then calculate weighted degree for each node.
+
 
 ## Attacks
 
@@ -116,7 +129,7 @@ The result will contain:
 
 
 - A chart to compare effectiveness of different anti-sybil algorithms to detect sybils in different attacks
-![](https://explorer.brightid.org/assets/1589538690.png)
+![](https://explorer.brightid.org/charts/compare_graph.png)
 
 
 ## Old Version
