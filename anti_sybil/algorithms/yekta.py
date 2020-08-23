@@ -23,12 +23,16 @@ class Yekta():
         for node in clusters:
             cluster = clusters[node]
             cluster_members[cluster].add(node)
+            # node.clusters = {'graph': cluster}
         for cluster in cluster_members:
             members = cluster_members[cluster]
             members = sorted(members, key=lambda m: m.created_at)
             init_rank = sum([m.init_rank for m in members])
-            # this means for each seed group in a cluster 100 members can be passed
-            limit = int(init_rank / 0.01)
+            # This means for each seed group in a cluster 50 members can be passed
+            # and it will increase by increasing the number of seeds in the cluster
+            if init_rank > 1:
+                init_rank = init_rank ** 1.7
+            limit = int(init_rank / 0.02)
             for member in members[limit:]:
                 graph.remove_node(member)
 
