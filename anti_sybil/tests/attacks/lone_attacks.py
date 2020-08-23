@@ -1,6 +1,8 @@
-from anti_sybil.utils import Node
-import random
 import time
+import random
+from anti_sybil.utils import Node
+from anti_sybil.utils import reset_ranks
+import anti_sybil.algorithms as algorithms
 
 
 # the attacker connects to the seeds
@@ -124,4 +126,27 @@ def collusion_attack(graph, options):
         s, t = random.sample(sybils, 2)
         graph.add_edge(s, t)
 
+    return graph
+
+
+# the stupid sybil attack
+def stupid_sybil(graph, options):
+    sybils = []
+    attackers = [n for n in graph if n.rank > 0]
+    attackers.sort(key=lambda n: n.rank, reverse=True)
+    for attacker in attackers:
+        attacker.groups['stupid_sybil'] = 'NonSeed'
+        for i in range(2):
+            groups = {'stupid_sybil': 'NonSeed'}
+            sybil = Node('stupid_sybil_{}'.format(i), 'Sybil', groups=groups, created_at=int(time.time() * 1000))
+            sybils.append(sybil)
+            graph.add_edge(attacker, sybil)
+        reset_ranks(graph)
+        ranker = algorithms.GroupSybilRank(graph)
+        ranker.rank()
+        border = max([s.rank for s in sybils])
+        if border:
+            break
+        graph.remove_nodes_from(sybils)
+        del attacker.groups['stupid_sybil']
     return graph

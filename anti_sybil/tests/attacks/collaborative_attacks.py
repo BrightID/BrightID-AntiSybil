@@ -1,7 +1,7 @@
-from anti_sybil.utils import Node
+import time
 import random
 import itertools
-import time
+from anti_sybil.utils import Node
 
 
 # the attackers connect to the seeds
@@ -227,3 +227,24 @@ def outside_degree(graph, sybil):
         if n.name.startswith('s-') and not n.name.startswith(perfix):
             num += 1
     return num
+
+
+def many_small_groups_attack(graph, options):
+    sybils = []
+    attackers = [n for n in graph if n.node_type == 'Seed']
+    attackers.sort(key=lambda n: n.rank, reverse=False)
+    attackers = attackers[:options['num_attacker']]
+
+    for i in range(options['num_sybils']):
+        groups = {'sg-{}'.format(i): 'NonSeed'}
+        sybil = Node('s-{}'.format(i), 'Sybil', groups=groups, created_at=int(time.time() * 1000))
+        sybils.append(sybil)
+        for attacker in attackers:
+            graph.add_edge(sybil, attacker)
+            attacker.groups.update(groups)
+
+    # connecting the sybil nodes together
+    for i in range(options['stitches']):
+        s, t = random.sample(sybils, 2)
+        graph.add_edge(s, t)
+    return graph

@@ -1,5 +1,4 @@
 import collaborative_attacks as collaborative
-import special_attacks as special
 import lone_attacks as lone
 import manual_attack as manual
 from anti_sybil import algorithms
@@ -33,7 +32,7 @@ ATTACKS = {
     'n groups of disconnected seeds as attacker': collaborative.collusion_attack,
     'n groups of high degree seeds as attacker': collaborative.collusion_attack,
     'n groups of honests as attacker': collaborative.collusion_attack,
-    'many small groups attack': special.many_small_groups_attack,
+    'many small groups attack': collaborative.many_small_groups_attack,
     'multi cluster attack': collaborative.multi_cluster_attack,
     # 'manual attack': manual.attack
 }
