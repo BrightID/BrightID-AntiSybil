@@ -94,8 +94,8 @@ def successful_honests(graph, description, algorithm):
                 res[node.rank]['honests'] += 1
         for rank in sorted(res):
             print(f"Rank: {rank}\t No. honests: {res[rank]['honests']}\t No. sybils: {res[rank]['sybils']}")
-    print(f'No. honests:\t{len(honests)}\nNo. sybils:\t{len(sybils)}\nNo. verified:\t{verified}\nPercent:\t{percent}\n')
-    if DENSE_GRAPH and percent < 1:
+    print(f'No. honests:\t{len(honests)}\nNo. sybils:\t{len(sybils)}\nNo. verified:\t{verified}\nPercent:\t{round(percent, 2)}\n')
+    if not DENSE_GRAPH and percent < 1:
         percent = 1
     return percent
 
@@ -124,7 +124,8 @@ def plot():
         ax.set_ylim(ymin=1, ymax=128, auto=False)
         ax.yaxis.set_major_formatter(ScalarFormatter())
         plt.yticks([1, 2, 4, 8, 16, 32, 64, 100])
-    plt.savefig(os.path.join(OUTPUT_FOLDER, str(int(time.time())) + '.png'), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_FOLDER, str(
+        int(time.time())) + '.png'), dpi=300)
 
 
 def main():
