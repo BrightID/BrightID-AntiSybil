@@ -55,6 +55,8 @@ N_UNFAITHFUL_SEEDS = 5
 N_UNFAITHFUL_HONESTS = 5
 # connect each node to random 10 nodes in the graph
 DENSE_GRAPH = True
+# in the dense graph, add # NEW_EDGES to each node
+NEW_EDGES = 10
 
 # manual attack options
 # use `honest_ + integer` format to connect to the honests nodes

@@ -146,7 +146,7 @@ def main():
 
     if DENSE_GRAPH:
         for node in graph:
-            neighbors = random.sample(graph.nodes, 10)
+            neighbors = random.sample(graph.nodes, NEW_EDGES)
             for neighbor in neighbors:
                 if node != neighbor:
                     graph.add_edge(node, neighbor)
