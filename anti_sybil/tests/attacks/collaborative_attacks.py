@@ -203,15 +203,15 @@ def multi_cluster_attack(graph, options):
                          groups=groups, created_at=int(time.time() * 1000))
             sybils[sybil] = i
             graph.add_edge(sybil, attackers[i])
-        # inside_sybils = [n for n in sybils if sybils[n] == i]
-        # pairs = itertools.combinations(inside_sybils, 2)
-        # for s, t in pairs:
-        #     edges.append((s, t))
+        inside_sybils = [n for n in sybils if sybils[n] == i]
+        pairs = itertools.combinations(inside_sybils, 2)
+        for s, t in pairs:
+            graph.add_edge(s, t)
 
     for s1 in sybils:
         candidates = [s for s in sybils if sybils[s] !=
-                      sybils[s1] and outside_degree(graph, s) < 10]
-        num_sample = min(10 - outside_degree(graph, s1), len(candidates))
+                      sybils[s1] and outside_degree(graph, s) < 3]
+        num_sample = min(3 - outside_degree(graph, s1), len(candidates))
         if not candidates:
             continue
         candidates = random.sample(candidates, num_sample)
