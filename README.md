@@ -2,7 +2,7 @@
 This package provides a framework to evaluate the quality of different anti-sybil [algorithms](#algorithms), by simulating different [attacks](#attacks) to [BrightID's social graph](https://explorer.brightid.org).
 
 
-![](https://explorer.brightid.org/assets/compare_graph.png)
+![](https://explorer.brightid.org/charts/compare_graph.png)
 
 *Comparing performance of different algorithms in detecting sybils in different attacks*
 
@@ -129,7 +129,7 @@ The result will contain:
 
 
 - A chart to compare effectiveness of different anti-sybil algorithms to detect sybils in different attacks
-![](https://explorer.brightid.org/assets/compare_graph.png)
+![](https://explorer.brightid.org/charts/compare_graph.png)
 
 
 ## Old Version
