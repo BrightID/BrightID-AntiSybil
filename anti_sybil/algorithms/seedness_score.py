@@ -1,6 +1,8 @@
 import community
 from anti_sybil.utils import *
 
+RESOLUTIONS = [.1, .2, .3, .5, .7, 1, 1.3, 1.6, 2]
+
 
 class SeednessScore():
 
@@ -20,7 +22,7 @@ class SeednessScore():
         for n in graph:
             n.rank = n.init_rank
 
-        for resolution in [.1, .2, .3, .5, .7, 1, 1.3, 1.6, 2]:
+        for resolution in RESOLUTIONS:
             clusters = community.best_partition(
                 graph, resolution=resolution, randomize=False)
             cluster_members = {cluster: set() for cluster in clusters.values()}

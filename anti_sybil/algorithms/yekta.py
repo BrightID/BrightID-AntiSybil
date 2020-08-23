@@ -2,6 +2,10 @@ import community
 from anti_sybil.utils import *
 
 BORDERS = [3, 8, 13, 20, 30]
+RESOLUTIONS = [.1, .2, .3, .5, .7, 1, 1.3, 1.6, 2]
+USERS_PER_SEED_GROUP = 50
+SEEDNESS_AMPLIFICATION_POWER = 1.7
+
 
 class Yekta():
 
@@ -28,11 +32,11 @@ class Yekta():
             members = cluster_members[cluster]
             members = sorted(members, key=lambda m: m.created_at)
             init_rank = sum([m.init_rank for m in members])
-            # This means for each seed group in a cluster 50 members can be passed
-            # and it will increase by increasing the number of seeds in the cluster
+            # Amplify init_rank if there are more seed groups in the cluster
             if init_rank > 1:
-                init_rank = init_rank ** 1.7
-            limit = int(init_rank / 0.02)
+                init_rank = init_rank ** SEEDNESS_AMPLIFICATION_POWER
+            # This means for each seed group in a cluster USERS_PER_SEED_GROUP members can be passed
+            limit = int(init_rank * USERS_PER_SEED_GROUP)
             for member in members[limit:]:
                 graph.remove_node(member)
 
@@ -40,7 +44,7 @@ class Yekta():
         graph = self.graph.copy()
         self.check_seedness(graph)
 
-        for resolution in [.1, .2, .3, .5, .7, 1, 1.3, 1.6, 2]:
+        for resolution in RESOLUTIONS:
             # clustering the nodes
             clusters = community.best_partition(
                 graph, resolution=resolution, randomize=False)
