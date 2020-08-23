@@ -4,8 +4,9 @@ This package provides a framework to evaluate the quality of different anti-sybi
 
 ![](https://explorer.brightid.org/charts/compare_graph.png)
 
-*Comparing performance of different algorithms in detecting sybils in different attacks*
+*Comparing performance of different algorithms in detecting sybils in different attacks in a dense graph*
 
+You can find more details about performance of different algorithms [here](https://github.com/BrightID/BrightID-AntiSybil/wiki/Compare-Yekta-with-other-anti-sybil-algorithms).
 
 ## Algorithms
 
