@@ -226,6 +226,8 @@ def from_dump(f):
         if g in seed_groups_members:
             users[u]['node_type'] = 'Seed'
             users[u]['init_rank'] += 1 / len(seed_groups_members[g])
+    for u in users:
+        users[u]['init_rank'] = min(.3, users[u]['init_rank'])
     for c in connections.values():
         ret['edges'].append(
             [c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
