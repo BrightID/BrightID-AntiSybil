@@ -44,17 +44,17 @@ N_TARGETS = 10
 # number of sybils
 N_SYBILS = 50
 # number of attackers
-N_ATTACKERS = 5
+N_ATTACKERS = 10
 # number of connections between sybils
-N_STITCHES = 0
+N_STITCHES = 500
 # number of sybil groups in group target attacks
-N_GROUPS = 100
+N_GROUPS = 500
 # number of unfaithful seeds in seeds as attacker attacks
-N_UNFAITHFUL_SEEDS = 3
+N_UNFAITHFUL_SEEDS = 5
 # number of unfaithful honests in honests as attacker attacks
-N_UNFAITHFUL_HONESTS = 3
+N_UNFAITHFUL_HONESTS = 5
 # connect each node to random 10 nodes in the graph
-DENSE_GRAPH = False
+DENSE_GRAPH = True
 
 # manual attack options
 # use `honest_ + integer` format to connect to the honests nodes
@@ -106,31 +106,31 @@ ATTACKS_OPTIONS = {
     'n groups of honests as attacker': {'attacker_type': 'Honest', 'num_attacker': N_UNFAITHFUL_HONESTS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
     'many small groups attack': {'num_sybils': N_SYBILS, 'stitches': N_STITCHES, 'num_attacker': N_UNFAITHFUL_SEEDS},
     'multi cluster attack': {'attacker_type': 'Seed', 'num_attacker': N_UNFAITHFUL_SEEDS, 'num_sybils': N_SYBILS, 'one_group': False, 'stitches': N_STITCHES},
-    # 'manual attack': MANUAL_ATTACK_OPTIONS
+    'manual attack': MANUAL_ATTACK_OPTIONS
 }
 
 # Select Algorithms
 ALGORITHMS = {
-    # 'yekta': algorithms.Yekta,
     'sybil rank': algorithms.SybilRank,
-    # 'landing probability': algorithms.LandingProbability,
-    # 'weighted sybil rank': algorithms.WeightedSybilRank,
-    # 'normalized sybil rank': algorithms.NormalizedSybilRank,
-    # 'cluster rank': algorithms.ClusterRank,
-    # 'seedness score': algorithms.SeednessScore,
-    # 'group sybil rank': algorithms.GroupSybilRank,
     # 'group sybil rank v1': algorithms.V1GroupSybilRank,
+    # 'group sybil rank': algorithms.GroupSybilRank,
+    'weighted sybil rank': algorithms.WeightedSybilRank,
+    'landing probability': algorithms.LandingProbability,
+    'normalized sybil rank': algorithms.NormalizedSybilRank,
+    'cluster rank': algorithms.ClusterRank,
+    'seedness score': algorithms.SeednessScore,
+    'yekta': algorithms.Yekta,
 }
 
 # Algorithms options
 ALGORITHMS_OPTIONS = {
-    'yekta': {},
     'sybil rank': {},
-    'landing probability': {},
+    'group sybil rank v1': {},
+    'group sybil rank': {},
     'weighted sybil rank': {},
+    'landing probability': {},
     'normalized sybil rank': {},
     'cluster rank': {},
     'seedness score': {},
-    'group sybil rank': {},
-    'group sybil rank v1': {},
+    'yekta': {},
 }
