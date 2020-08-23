@@ -46,7 +46,7 @@ def tests(graph, description, file_name, outputs, charts):
             graph, ALGORITHMS_OPTIONS[algorithm_name])
         ranker.rank()
 
-        if algorithm_name != 'yekta':
+        if algorithm_name not in ['yekta', 'cluster rank']:
             linear_distribution(ranker.graph)
 
         for node in graph:
