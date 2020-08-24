@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="anti_sybil",
-    version="1.1.0",
+    version="1.1.1",
     author="Abram Symons",
     author_email="abram.symons@protonmail.com",
     description="Anti sybil package for BrightID",
