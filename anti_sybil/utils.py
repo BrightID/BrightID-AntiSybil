@@ -7,7 +7,6 @@ import requests
 import json
 import csv
 import os
-from . import algorithms
 
 GRAPH_TEMPLATE = GRAPH_3D_TEMPLATE = COMPARE_GRAPH_TEMPLATE = None
 BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
@@ -327,6 +326,7 @@ def load_brightid_graph(data):
 
 
 def stupid_sybil_border(graph):
+    from . import algorithms
     border = 0
     reset_ranks(graph)
     ranker = algorithms.GroupSybilRank(graph)
