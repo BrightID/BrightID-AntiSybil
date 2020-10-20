@@ -227,9 +227,15 @@ def from_dump(f):
             users[u]['init_rank'] += 1 / len(seed_groups_members[g])
     for u in users:
         users[u]['init_rank'] = min(.3, users[u]['init_rank'])
+    connections_dic = {}
     for c in connections.values():
-        ret['edges'].append(
-            [c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
+        connections_dic[f"{c['_from']}_{c['_to']}"] = c['level']
+    for c in connections.values():
+        from_to = connections_dic.get(f"{c['_from']}_{c['_to']}") in ['already know', 'recovery']
+        to_from = connections_dic.get(f"{c['_to']}_{c['_from']}") in ['already know', 'recovery']
+        if from_to and to_from:
+            ret['edges'].append(
+                [c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
     ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
     ret['nodes'] = sorted(
         ret['nodes'], key=lambda i: i['created_at'], reverse=True)
