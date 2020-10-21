@@ -3,9 +3,7 @@ from anti_sybil.utils import *
 
 BORDERS = [3, 8, 13, 20, 30]
 RESOLUTIONS = [.1, .2, .3, .5, .7, 1, 1.3, 1.6, 2]
-USERS_PER_SEED_GROUP = 50
-SEEDNESS_AMPLIFICATION_POWER = 1.7
-
+SEED_CONNECTED_LIMIT = .2
 
 class Yekta():
 
@@ -30,15 +28,11 @@ class Yekta():
             # node.clusters = {'graph': cluster}
         for cluster in cluster_members:
             members = cluster_members[cluster]
-            members = sorted(members, key=lambda m: m.created_at)
-            init_rank = sum([m.init_rank for m in members])
-            # Amplify init_rank if there are more seed groups in the cluster
-            if init_rank > 1:
-                init_rank = init_rank ** SEEDNESS_AMPLIFICATION_POWER
-            # This means for each seed group in a cluster USERS_PER_SEED_GROUP members can be passed
-            limit = int(init_rank * USERS_PER_SEED_GROUP)
-            for member in members[limit:]:
-                graph.remove_node(member)
+            seed_connected_members = [
+                m for m in members if 'SeedConnected' in m.verifications]
+            if len(seed_connected_members) / len(members) < SEED_CONNECTED_LIMIT:
+                for member in members:
+                    graph.remove_node(member)
 
     def rank(self):
         graph = self.graph.copy()
@@ -102,4 +96,5 @@ class Yekta():
                     num += w / max(1, (step - neighbor.rank))
                 if num >= border:
                     node.rank = step
+                    node.raw_rank = num
         return self.graph
