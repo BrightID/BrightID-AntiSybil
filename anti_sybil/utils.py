@@ -203,12 +203,14 @@ def from_dump(f):
     users = zip2dict(f, 'users')
     groups = zip2dict(f, 'groups')
     connections = zip2dict(f, 'connections')
+    verifications = zip2dict(f, 'verifications')
     ret = {'nodes': [], 'edges': []}
     for u in users:
         users[u] = {'node_type': 'Honest', 'init_rank': 0, 'rank': 0, 'name': u,
-                    'groups': {}, 'created_at': users[u]['createdAt']}
+                    'groups': {}, 'created_at': users[u]['createdAt'], 'verifications': []}
         ret['nodes'].append(users[u])
-
+    for v in verifications.values():
+        users[v['user']]['verifications'].append(v['name'])
     user_groups = [(
         user_group['_from'].replace('users/', ''),
         user_group['_to'].replace('groups/', '')
