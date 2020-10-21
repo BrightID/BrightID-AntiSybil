@@ -13,13 +13,14 @@ BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
 
 
 class Node:
-    def __init__(self, name, node_type, groups=None, init_rank=0, rank=None, created_at=None):
+    def __init__(self, name, node_type, groups=None, init_rank=0, rank=None, created_at=None, verifications=[]):
         self.name = name
         self.node_type = node_type
         self.rank = rank
         self.groups = groups if groups else {}
         self.init_rank = init_rank
         self.created_at = created_at
+        self.verifications = verifications
 
     def __repr__(self):
         return 'Node: {}'.format(self.name)
@@ -174,7 +175,7 @@ def from_json(data):
     for node in data['nodes']:
         groups = node['groups'] if node['groups'] else None
         nodes[node['name']] = Node(node['name'], node['node_type'],
-                                   groups, node['init_rank'], node['rank'], node['created_at'])
+                                   groups, node['init_rank'], node['rank'], node['created_at'], node['verifications'])
         graph.add_node(nodes[node['name']])
     graph.add_edges_from([(nodes[edge[0]], nodes[edge[1]])
                           for edge in data['edges']])
