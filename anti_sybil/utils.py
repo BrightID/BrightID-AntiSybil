@@ -13,13 +13,15 @@ BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
 
 
 class Node:
-    def __init__(self, name, node_type, groups=None, init_rank=0, rank=None, created_at=None):
+    def __init__(self, name, node_type, groups=None, init_rank=0, raw_rank=0, rank=None, created_at=None, verifications=[]):
         self.name = name
         self.node_type = node_type
         self.rank = rank
         self.groups = groups if groups else {}
         self.init_rank = init_rank
+        self.raw_rank = raw_rank
         self.created_at = created_at
+        self.verifications = verifications
 
     def __repr__(self):
         return 'Node: {}'.format(self.name)
@@ -174,7 +176,7 @@ def from_json(data):
     for node in data['nodes']:
         groups = node['groups'] if node['groups'] else None
         nodes[node['name']] = Node(node['name'], node['node_type'],
-                                   groups, node['init_rank'], node['rank'], node['created_at'])
+                                   groups, node['init_rank'], 0, node['rank'], node['created_at'], node['verifications'])
         graph.add_node(nodes[node['name']])
     graph.add_edges_from([(nodes[edge[0]], nodes[edge[1]])
                           for edge in data['edges']])
@@ -203,12 +205,14 @@ def from_dump(f):
     users = zip2dict(f, 'users')
     groups = zip2dict(f, 'groups')
     connections = zip2dict(f, 'connections')
+    verifications = zip2dict(f, 'verifications')
     ret = {'nodes': [], 'edges': []}
     for u in users:
         users[u] = {'node_type': 'Honest', 'init_rank': 0, 'rank': 0, 'name': u,
-                    'groups': {}, 'created_at': users[u]['createdAt']}
+                    'groups': {}, 'created_at': users[u]['createdAt'], 'verifications': []}
         ret['nodes'].append(users[u])
-
+    for v in verifications.values():
+        users[v['user']]['verifications'].append(v['name'])
     user_groups = [(
         user_group['_from'].replace('users/', ''),
         user_group['_to'].replace('groups/', '')
@@ -227,9 +231,15 @@ def from_dump(f):
             users[u]['init_rank'] += 1 / len(seed_groups_members[g])
     for u in users:
         users[u]['init_rank'] = min(.3, users[u]['init_rank'])
+    connections_dic = {}
     for c in connections.values():
-        ret['edges'].append(
-            [c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
+        connections_dic[f"{c['_from']}_{c['_to']}"] = c['level']
+    for c in connections.values():
+        from_to = connections_dic.get(f"{c['_from']}_{c['_to']}") in ['already know', 'recovery']
+        to_from = connections_dic.get(f"{c['_to']}_{c['_from']}") in ['already know', 'recovery']
+        if from_to and to_from:
+            ret['edges'].append(
+                [c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
     ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
     ret['nodes'] = sorted(
         ret['nodes'], key=lambda i: i['created_at'], reverse=True)
