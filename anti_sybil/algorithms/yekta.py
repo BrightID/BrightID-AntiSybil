@@ -96,5 +96,6 @@ class Yekta():
                     num += w / max(1, (step - neighbor.rank))
                 if num >= border:
                     node.rank = step
+                if i == 0:
                     node.raw_rank = num
         return self.graph
