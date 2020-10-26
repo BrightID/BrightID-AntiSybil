@@ -13,7 +13,7 @@ BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
 
 
 class Node:
-    def __init__(self, name, node_type, groups=None, init_rank=0, raw_rank=0, rank=None, created_at=None, verifications=[]):
+    def __init__(self, name, node_type, groups=None, init_rank=0, raw_rank=0, rank=None, created_at=None, verifications=None):
         self.name = name
         self.node_type = node_type
         self.rank = rank
@@ -21,7 +21,7 @@ class Node:
         self.init_rank = init_rank
         self.raw_rank = raw_rank
         self.created_at = created_at
-        self.verifications = verifications
+        self.verifications = verifications if verifications else []
 
     def __repr__(self):
         return 'Node: {}'.format(self.name)
@@ -235,8 +235,8 @@ def from_dump(f):
     for c in connections.values():
         connections_dic[f"{c['_from']}_{c['_to']}"] = c['level']
     for c in connections.values():
-        from_to = connections_dic.get(f"{c['_from']}_{c['_to']}") in ['already know', 'recovery']
-        to_from = connections_dic.get(f"{c['_to']}_{c['_from']}") in ['already know', 'recovery']
+        from_to = connections_dic.get(f"{c['_from']}_{c['_to']}") in ['already known', 'recovery']
+        to_from = connections_dic.get(f"{c['_to']}_{c['_from']}") in ['already known', 'recovery']
         if from_to and to_from:
             ret['edges'].append(
                 [c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
