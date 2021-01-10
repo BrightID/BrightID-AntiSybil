@@ -1,3 +1,4 @@
+from arango import ArangoClient
 from bisect import bisect
 import networkx as nx
 import numpy as np
@@ -235,11 +236,53 @@ def from_dump(f):
     for c in connections.values():
         connections_dic[f"{c['_from']}_{c['_to']}"] = c['level']
     for c in connections.values():
+        f = c['_from'].replace('users/', '')
+        t = c['_to'].replace('users/', '')
         from_to = connections_dic.get(f"{c['_from']}_{c['_to']}") in ['already known', 'recovery']
         to_from = connections_dic.get(f"{c['_to']}_{c['_from']}") in ['already known', 'recovery']
-        if from_to and to_from:
-            ret['edges'].append(
-                [c['_from'].replace('users/', ''), c['_to'].replace('users/', '')])
+        if from_to and to_from and (t, f) not in ret['edges']:
+            ret['edges'].append((f, t))
+    ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
+    ret['nodes'] = sorted(
+        ret['nodes'], key=lambda i: i['created_at'], reverse=True)
+    return json.dumps(ret)
+
+
+def from_db(db_name):
+    db = ArangoClient().db(db_name)
+    seed_groups = {}
+    for seed_group in db['groups'].find({'seed': True}):
+        c = db['usersInGroups'].find({'_to': seed_group['_id']})
+        seed_groups[seed_group['_key']] = c.count()
+
+    nodes = {}
+    for u in db['users']:
+        verifications = [v['name']
+                         for v in db['verifications'].find({'user': u['_key']})]
+        nodes[u['_key']] = {'node_type': 'Honest', 'init_rank': 0, 'rank': 0,
+                'name': u['_key'], 'groups': {}, 'created_at': u['createdAt'], 'verifications': verifications}
+
+    for ug in db['usersInGroups']:
+        u = ug['_from'].replace('users/', '')
+        g = ug['_to'].replace('groups/', '')
+        nodes[u]['groups'][g] = 'Seed' if g in seed_groups else 'NonSeed'
+        if g in seed_groups:
+            nodes[u]['node_type'] = 'Seed'
+            nodes[u]['init_rank'] += 1 / seed_groups[g]
+    for n in nodes:
+        nodes[n]['init_rank'] = min(.3, nodes[n]['init_rank'])
+    ret = {'edges': []}
+    connections = {f"{c['_from']}_{c['_to']}": c['level'] for c in db['connections']}
+    for c in db['connections']:
+        f = c['_from'].replace('users/', '')
+        t = c['_to'].replace('users/', '')
+        from_to = connections.get(
+            f"{c['_from']}_{c['_to']}") in ['already known', 'recovery']
+        to_from = connections.get(
+            f"{c['_to']}_{c['_from']}") in ['already known', 'recovery']
+        if from_to and to_from and (t, f) not in ret['edges']:
+            ret['edges'].append((f, t))
+    ret['nodes'] = nodes.values()
     ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
     ret['nodes'] = sorted(
         ret['nodes'], key=lambda i: i['created_at'], reverse=True)

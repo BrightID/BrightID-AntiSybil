@@ -3,3 +3,4 @@ flask
 requests
 matplotlib
 xmltodict
+python-arango==5.4.0
