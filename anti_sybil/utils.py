@@ -238,8 +238,10 @@ def from_dump(f):
     for c in connections.values():
         f = c['_from'].replace('users/', '')
         t = c['_to'].replace('users/', '')
-        from_to = connections_dic.get(f"{c['_from']}_{c['_to']}") in ['already known', 'recovery']
-        to_from = connections_dic.get(f"{c['_to']}_{c['_from']}") in ['already known', 'recovery']
+        from_to = connections_dic.get(f"{c['_from']}_{c['_to']}") in [
+            'already known', 'recovery']
+        to_from = connections_dic.get(f"{c['_to']}_{c['_from']}") in [
+            'already known', 'recovery']
         if from_to and to_from and (t, f) not in ret['edges']:
             ret['edges'].append((f, t))
     ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
@@ -248,8 +250,8 @@ def from_dump(f):
     return json.dumps(ret)
 
 
-def from_db(db_name):
-    db = ArangoClient().db(db_name)
+def from_db(arango_server, db_name):
+    db = ArangoClient(hosts=arango_server).db(db_name)
     seed_groups = {}
     for seed_group in db['groups'].find({'seed': True}):
         c = db['usersInGroups'].find({'_to': seed_group['_id']})
@@ -260,7 +262,7 @@ def from_db(db_name):
         verifications = [v['name']
                          for v in db['verifications'].find({'user': u['_key']})]
         nodes[u['_key']] = {'node_type': 'Honest', 'init_rank': 0, 'rank': 0,
-                'name': u['_key'], 'groups': {}, 'created_at': u['createdAt'], 'verifications': verifications}
+                            'name': u['_key'], 'groups': {}, 'created_at': u['createdAt'], 'verifications': verifications}
 
     for ug in db['usersInGroups']:
         u = ug['_from'].replace('users/', '')
@@ -272,7 +274,8 @@ def from_db(db_name):
     for n in nodes:
         nodes[n]['init_rank'] = min(.3, nodes[n]['init_rank'])
     ret = {'edges': []}
-    connections = {f"{c['_from']}_{c['_to']}": c['level'] for c in db['connections']}
+    connections = {f"{c['_from']}_{c['_to']}": c['level']
+                   for c in db['connections']}
     for c in db['connections']:
         f = c['_from'].replace('users/', '')
         t = c['_to'].replace('users/', '')
