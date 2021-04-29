@@ -8,7 +8,9 @@ class SybilRank():
         self.options = options if options else {}
 
     def rank(self):
-        num_iterations = max(3, int(math.ceil(math.log10(self.graph.order()))))
+        m = 2 if self.options.get('directed', False) else 1
+        num_iterations = max(
+            3, int(math.ceil(math.log10(self.graph.order())) / m))
         nodes_rank = {node: node.init_rank for node in self.graph}
         for i in range(num_iterations):
             nodes_rank = self.spread_nodes_rank(nodes_rank)
@@ -23,10 +25,13 @@ class SybilRank():
         new_nodes_rank = {}
         for node in nodes_rank:
             new_trust = 0
-            neighbors = self.graph.neighbors(node)
+            if self.options.get('directed', False):
+                neighbors = self.graph.predecessors(node)
+            else:
+                neighbors = self.graph.neighbors(node)
             for neighbor in neighbors:
                 neighbor_degree = self.graph.degree(neighbor, weight='weight')
-                edge_weight = self.graph[node][neighbor].get('weight', 1)
+                edge_weight = self.graph[neighbor][node].get('weight', 1)
                 if neighbor_degree > 0:
                     new_trust += nodes_rank[neighbor] * \
                         edge_weight / neighbor_degree
