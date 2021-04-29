@@ -170,9 +170,9 @@ def load_graph(file_name):
     return from_json(data)
 
 
-def from_json(data):
+def from_json(data, directed=False):
     data = json.loads(data)
-    graph = nx.Graph()
+    graph = nx.DiGraph() if directed else nx.Graph()
     nodes = {}
     for node in data['nodes']:
         groups = node['groups'] if node['groups'] else None
@@ -201,7 +201,7 @@ def zip2dict(f, table):
     return dict((d[k]['_id'].replace(table + '/', ''), d[k]) for k in d)
 
 
-def from_dump(f):
+def from_dump(f, directed=False):
     user_groups = zip2dict(f, 'usersInGroups')
     users = zip2dict(f, 'users')
     groups = zip2dict(f, 'groups')
@@ -232,6 +232,7 @@ def from_dump(f):
             users[u]['init_rank'] += 1 / len(seed_groups_members[g])
     for u in users:
         users[u]['init_rank'] = min(.3, users[u]['init_rank'])
+        users[u]['verifications'].sort()
     connections_dic = {}
     for c in connections.values():
         connections_dic[f"{c['_from']}_{c['_to']}"] = c['level']
@@ -242,15 +243,19 @@ def from_dump(f):
             'already known', 'recovery']
         to_from = connections_dic.get(f"{c['_to']}_{c['_from']}") in [
             'already known', 'recovery']
-        if from_to and to_from and (t, f) not in ret['edges']:
-            ret['edges'].append((f, t))
+        if directed:
+            if from_to:
+                ret['edges'].append((f, t))
+        else:
+            if from_to and to_from and (t, f) not in ret['edges']:
+                ret['edges'].append((f, t))
     ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
     ret['nodes'] = sorted(
         ret['nodes'], key=lambda i: i['created_at'], reverse=True)
     return json.dumps(ret)
 
 
-def from_db(arango_server, db_name):
+def from_db(arango_server, db_name, directed=False):
     db = ArangoClient(hosts=arango_server).db(db_name)
     seed_groups = {}
     for seed_group in db['groups'].find({'seed': True}):
@@ -273,6 +278,7 @@ def from_db(arango_server, db_name):
             nodes[u]['init_rank'] += 1 / seed_groups[g]
     for n in nodes:
         nodes[n]['init_rank'] = min(.3, nodes[n]['init_rank'])
+        nodes[n]['verifications'].sort()
     ret = {'edges': []}
     connections = {f"{c['_from']}_{c['_to']}": c['level']
                    for c in db['connections']}
@@ -283,8 +289,12 @@ def from_db(arango_server, db_name):
             f"{c['_from']}_{c['_to']}") in ['already known', 'recovery']
         to_from = connections.get(
             f"{c['_to']}_{c['_from']}") in ['already known', 'recovery']
-        if from_to and to_from and (t, f) not in ret['edges']:
-            ret['edges'].append((f, t))
+        if directed:
+            if from_to:
+                ret['edges'].append((f, t))
+        else:
+            if from_to and to_from and (t, f) not in ret['edges']:
+                ret['edges'].append((f, t))
     ret['nodes'] = nodes.values()
     ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
     ret['nodes'] = sorted(
@@ -367,7 +377,7 @@ def tar_to_zip(fin, fout):
     zipf.close()
 
 
-def load_brightid_graph(data):
+def load_brightid_graph(data, directed=False):
     if not os.path.exists(data['file_path']):
         os.makedirs(data['file_path'])
     rar_addr = os.path.join(data['file_path'], 'brightid.tar.gz')
@@ -376,8 +386,8 @@ def load_brightid_graph(data):
     with open(rar_addr, 'wb') as f:
         f.write(backup.content)
     tar_to_zip(rar_addr, zip_addr)
-    json_graph = from_dump(zip_addr)
-    graph = from_json(json_graph)
+    json_graph = from_dump(zip_addr, directed)
+    graph = from_json(json_graph, directed)
     return graph
 
 
