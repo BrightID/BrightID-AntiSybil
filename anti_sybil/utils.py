@@ -8,6 +8,7 @@ import requests
 import json
 import csv
 import os
+import time
 
 GRAPH_TEMPLATE = GRAPH_3D_TEMPLATE = COMPARE_GRAPH_TEMPLATE = None
 BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
@@ -257,48 +258,64 @@ def from_dump(f, directed=False):
 
 def from_db(arango_server, db_name, directed=False):
     db = ArangoClient(hosts=arango_server).db(db_name)
+    ret = {'nodes': [], 'edges': []}
     seed_groups = {}
     for seed_group in db['groups'].find({'seed': True}):
         c = db['usersInGroups'].find({'_to': seed_group['_id']})
         seed_groups[seed_group['_key']] = c.count()
 
-    nodes = {}
-    for u in db['users']:
-        verifications = [v['name']
-                         for v in db['verifications'].find({'user': u['_key']})]
-        nodes[u['_key']] = {'node_type': 'Honest', 'init_rank': 0, 'rank': 0,
-                            'name': u['_key'], 'groups': {}, 'created_at': u['createdAt'], 'verifications': verifications}
+    hashes = json.loads(
+        next(filter(lambda v: v['_key'] == 'VERIFICATIONS_HASHES', db['variables']))['hashes'])
+    verifications_block = sorted([int(block) for block in hashes])[-1]
+    user_verifications = {}
+    for v in db['verifications'].find({'block': verifications_block}):
+        if v['user'] not in user_verifications:
+            user_verifications[v['user']] = []
+        user_verifications[v['user']].append(v['name'])
 
+    ug_data = {}
     for ug in db['usersInGroups']:
-        u = ug['_from'].replace('users/', '')
+        u = ug['_from']
         g = ug['_to'].replace('groups/', '')
-        nodes[u]['groups'][g] = 'Seed' if g in seed_groups else 'NonSeed'
+        if u not in ug_data:
+            ug_data[u] = {'node_type': 'Honest', 'groups': {}, 'init_rank': 0}
         if g in seed_groups:
-            nodes[u]['node_type'] = 'Seed'
-            nodes[u]['init_rank'] += 1 / seed_groups[g]
-    for n in nodes:
-        nodes[n]['init_rank'] = min(.3, nodes[n]['init_rank'])
-        nodes[n]['verifications'].sort()
-    ret = {'edges': []}
-    connections = {f"{c['_from']}_{c['_to']}": c['level']
-                   for c in db['connections']}
-    for c in db['connections']:
-        f = c['_from'].replace('users/', '')
-        t = c['_to'].replace('users/', '')
-        from_to = connections.get(
-            f"{c['_from']}_{c['_to']}") in ['already known', 'recovery']
-        to_from = connections.get(
-            f"{c['_to']}_{c['_from']}") in ['already known', 'recovery']
-        if directed:
-            if from_to:
-                ret['edges'].append((f, t))
+            ug_data[u]['groups'][g] = 'Seed'
+            ug_data[u]['node_type'] = 'Seed'
+            ug_data[u]['init_rank'] += 1 / seed_groups[g]
         else:
-            if from_to and to_from and (t, f) not in ret['edges']:
-                ret['edges'].append((f, t))
-    ret['nodes'] = nodes.values()
-    ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
-    ret['nodes'] = sorted(
-        ret['nodes'], key=lambda i: i['created_at'], reverse=True)
+            ug_data[u]['groups'][g] = 'NonSeed'
+
+    for u in db['users']:
+        info = ug_data.get(
+            u['_id'], {'node_type': 'Honest', 'groups': {}, 'init_rank': 0})
+        ret['nodes'].append({
+            'node_type': info['node_type'],
+            'init_rank': min(.3, info['init_rank']),
+            'rank': 0,
+            'name': u['_key'],
+            'groups': info['groups'],
+            'created_at': u['createdAt'],
+            'verifications': sorted(user_verifications.get(u['_key'], []))
+        })
+
+    connections = {(
+        c['_from'].replace('users/', ''),
+        c['_to'].replace('users/', '')
+    ): c for c in db['connections']}
+    for ft in connections:
+        if connections[ft]['level'] not in ('already known', 'recovery'):
+            continue
+        if directed:
+            ret['edges'].append(ft)
+        else:
+            tf = (ft[1], ft[0])
+            tf_level = connections.get(tf, {}).get('level')
+            if tf_level in ('already known', 'recovery') and tf not in ret['edges']:
+                ret['edges'].append(ft)
+
+    ret['nodes'].sort(key=lambda i: i['name'])
+    ret['nodes'].sort(key=lambda i: i['created_at'], reverse=True)
     return json.dumps(ret)
 
 
