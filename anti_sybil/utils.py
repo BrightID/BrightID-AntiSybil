@@ -8,7 +8,6 @@ import requests
 import json
 import csv
 import os
-import time
 
 GRAPH_TEMPLATE = GRAPH_3D_TEMPLATE = COMPARE_GRAPH_TEMPLATE = None
 BACKUP_URL = 'https://storage.googleapis.com/brightid-backups/brightid.tar.gz'
@@ -287,14 +286,14 @@ def from_db(arango_server, db_name, directed=False):
             ug_data[u]['groups'][g] = 'NonSeed'
 
     for u in db['users']:
-        info = ug_data.get(
+        temp = ug_data.get(
             u['_id'], {'node_type': 'Honest', 'groups': {}, 'init_rank': 0})
         ret['nodes'].append({
-            'node_type': info['node_type'],
-            'init_rank': min(.3, info['init_rank']),
+            'node_type': temp['node_type'],
+            'init_rank': min(.3, temp['init_rank']),
             'rank': 0,
             'name': u['_key'],
-            'groups': info['groups'],
+            'groups': temp['groups'],
             'created_at': u['createdAt'],
             'verifications': sorted(user_verifications.get(u['_key'], []))
         })
