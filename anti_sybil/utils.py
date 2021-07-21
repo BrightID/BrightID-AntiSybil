@@ -5,6 +5,7 @@ import numpy as np
 import zipfile
 import tarfile
 import requests
+import shutil
 import json
 import csv
 import os
@@ -202,56 +203,70 @@ def zip2dict(f, table):
 
 
 def from_dump(f, directed=False):
-    user_groups = zip2dict(f, 'usersInGroups')
-    users = zip2dict(f, 'users')
-    groups = zip2dict(f, 'groups')
-    connections = zip2dict(f, 'connections')
-    verifications = zip2dict(f, 'verifications')
     ret = {'nodes': [], 'edges': []}
-    for u in users:
-        users[u] = {'node_type': 'Honest', 'init_rank': 0, 'rank': 0, 'name': u,
-                    'groups': {}, 'created_at': users[u]['createdAt'], 'verifications': []}
-        ret['nodes'].append(users[u])
-    for v in verifications.values():
-        users[v['user']]['verifications'].append(v['name'])
-    user_groups = [(
-        user_group['_from'].replace('users/', ''),
-        user_group['_to'].replace('groups/', '')
-    ) for user_group in user_groups.values()]
-    seed_groups_members = {}
-    for u, g in user_groups:
-        if groups[g].get('seed', False):
-            if g not in seed_groups_members:
-                seed_groups_members[g] = set()
-            seed_groups_members[g].add(u)
+    hashes = json.loads(
+        next(filter(lambda v: v['_key'] == 'VERIFICATIONS_HASHES', records(f, 'variables')))['hashes'])
+    verifications_block = sorted([int(block) for block in hashes])[-1]
+    user_verifications = {}
+    for v in records(f, 'verifications'):
+        if v['block'] != verifications_block:
+            continue
+        if v['user'] not in user_verifications:
+            user_verifications[v['user']] = []
+        user_verifications[v['user']].append(v['name'])
 
-    for u, g in user_groups:
-        users[u]['groups'][g] = 'Seed' if g in seed_groups_members else 'NonSeed'
-        if g in seed_groups_members:
-            users[u]['node_type'] = 'Seed'
-            users[u]['init_rank'] += 1 / len(seed_groups_members[g])
-    for u in users:
-        users[u]['init_rank'] = min(.3, users[u]['init_rank'])
-        users[u]['verifications'].sort()
-    connections_dic = {}
-    for c in connections.values():
-        connections_dic[f"{c['_from']}_{c['_to']}"] = c['level']
-    for c in connections.values():
-        f = c['_from'].replace('users/', '')
-        t = c['_to'].replace('users/', '')
-        from_to = connections_dic.get(f"{c['_from']}_{c['_to']}") in [
-            'already known', 'recovery']
-        to_from = connections_dic.get(f"{c['_to']}_{c['_from']}") in [
-            'already known', 'recovery']
-        if directed:
-            if from_to:
-                ret['edges'].append((f, t))
+    seed_groups = {g['_key']: 0 for g in filter(lambda r: r.get('seed'), records(f, 'groups'))}
+    ug_data = {}
+    for ug in records(f, 'usersInGroups'):
+        u = ug['_from']
+        g = ug['_to'].replace('groups/', '')
+        if u not in ug_data:
+            ug_data[u] = {'node_type': 'Honest', 'groups': {}, 'init_rank': 0}
+        if g in seed_groups:
+            ug_data[u]['groups'][g] = 'Seed'
+            ug_data[u]['node_type'] = 'Seed'
+            seed_groups[g] += 1
         else:
-            if from_to and to_from and (t, f) not in ret['edges']:
-                ret['edges'].append((f, t))
-    ret['nodes'] = sorted(ret['nodes'], key=lambda i: i['name'])
-    ret['nodes'] = sorted(
-        ret['nodes'], key=lambda i: i['created_at'], reverse=True)
+            ug_data[u]['groups'][g] = 'NonSeed'
+
+    for u in ug_data:
+        if ug_data[u]['node_type'] != 'Seed':
+            continue
+        for g in ug_data[u]['groups']:
+            if ug_data[u]['groups'][g] != 'Seed':
+                continue
+            ug_data[u]['init_rank'] += 1 / seed_groups[g]
+
+    for u in records(f, 'users'):
+        temp = ug_data.get(
+            u['_id'], {'node_type': 'Honest', 'groups': {}, 'init_rank': 0})
+        ret['nodes'].append({
+            'node_type': temp['node_type'],
+            'init_rank': min(.3, temp['init_rank']),
+            'rank': 0,
+            'name': u['_key'],
+            'groups': temp['groups'],
+            'created_at': u['createdAt'],
+            'verifications': sorted(user_verifications.get(u['_key'], []))
+        })
+
+    connections = {(
+        c['_from'].replace('users/', ''),
+        c['_to'].replace('users/', '')
+    ): c for c in records(f, 'connections')}
+    for ft in connections:
+        if connections[ft]['level'] not in ('already known', 'recovery'):
+            continue
+        if directed:
+            ret['edges'].append(ft)
+        else:
+            tf = (ft[1], ft[0])
+            tf_level = connections.get(tf, {}).get('level')
+            if tf_level in ('already known', 'recovery') and tf not in ret['edges']:
+                ret['edges'].append(ft)
+
+    ret['nodes'].sort(key=lambda i: i['name'])
+    ret['nodes'].sort(key=lambda i: i['created_at'], reverse=True)
     return json.dumps(ret)
 
 
@@ -380,31 +395,39 @@ def reset_ranks(graph):
         node.rank = 0
 
 
-def tar_to_zip(fin, fout):
-    if os.path.exists(fout):
-        os.remove(fout)
-    tarf = tarfile.open(fin, mode='r|gz')
-    zipf = zipfile.ZipFile(fout, mode='a', compression=zipfile.ZIP_DEFLATED)
-    for m in tarf:
-        f = tarf.extractfile(m)
-        if f:
-            zipf.writestr(m.name, f.read())
-    tarf.close()
-    zipf.close()
-
-
 def load_brightid_graph(data, directed=False):
     if not os.path.exists(data['file_path']):
         os.makedirs(data['file_path'])
     rar_addr = os.path.join(data['file_path'], 'brightid.tar.gz')
-    zip_addr = os.path.join(data['file_path'], 'brightid.zip')
+    backup_addr = os.path.join(data['file_path'], 'brightid/')
     backup = requests.get(BACKUP_URL)
     with open(rar_addr, 'wb') as f:
         f.write(backup.content)
-    tar_to_zip(rar_addr, zip_addr)
-    json_graph = from_dump(zip_addr, directed)
+    shutil.rmtree(backup_addr, ignore_errors=True)
+    os.makedirs(backup_addr)
+    tarf = tarfile.open(rar_addr, mode='r|gz')
+    tarf.extractall(backup_addr)
+    tarf.close()
+    json_graph = from_dump(os.path.join(backup_addr, 'dump/'), directed)
     graph = from_json(json_graph, directed)
     return graph
+
+
+def records(backup_addr, table):
+    fnames = os.listdir(backup_addr)
+    fname = next(filter(lambda fn: fn.startswith(
+        f'{table}_') and fn.endswith('.data.json'), fnames))
+    recs = []
+    with open(os.path.join(backup_addr, fname), 'r') as f:
+        for line in f.read().split('\n'):
+            if not line.strip():
+                continue
+            rec = json.loads(line)
+            if rec['type'] == 2300:
+                recs.append(rec['data'])
+            elif rec['type'] == 2302 and rec['data'] in recs:
+                recs.remove(rec['data'])
+    return recs
 
 
 def stupid_sybil_border(graph):
