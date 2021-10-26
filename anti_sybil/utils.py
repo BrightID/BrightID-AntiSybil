@@ -267,6 +267,8 @@ def from_db(arango_server, db_name):
     for ug in db['usersInGroups']:
         u = ug['_from'].replace('users/', '')
         g = ug['_to'].replace('groups/', '')
+        if u not in nodes:
+            continue
         nodes[u]['groups'][g] = 'Seed' if g in seed_groups else 'NonSeed'
         if g in seed_groups:
             nodes[u]['node_type'] = 'Seed'
