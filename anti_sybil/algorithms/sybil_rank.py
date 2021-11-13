@@ -30,8 +30,11 @@ class SybilRank():
             else:
                 neighbors = self.graph.neighbors(node)
             for neighbor in neighbors:
-                neighbor_degree = self.graph.degree(neighbor, weight='weight')
-                edge_weight = self.graph[node][neighbor].get('weight', 1)
+                if self.options.get('directed', False):
+                    neighbor_degree = self.graph.out_degree(neighbor, weight='weight')
+                else:
+                    neighbor_degree = self.graph.degree(neighbor, weight='weight')
+                edge_weight = self.graph[neighbor][node].get('weight', 1)
                 if neighbor_degree > 0:
                     new_trust += nodes_rank[neighbor] * \
                         edge_weight / neighbor_degree
